@@ -21,7 +21,7 @@
  */
 #include <irrlicht.h>
 #include "driverChoice.h"
-#include "JWSphere.h"
+#include "EarthVisualization.h"
 
 using namespace irr;
 
@@ -77,7 +77,7 @@ int main()
 	 to drop it only *after* I have finished using it, regardless of what
 	 the reference count of the object is after creation.
 	 */
-	JWSphere *myNode = new JWSphere(smgr->getRootSceneNode(), smgr, 666);
+	EarthVisualization *myNode = new EarthVisualization(smgr->getRootSceneNode(), smgr, 666);
 
 	/*
 	 To animate something in this boring scene consisting only of one

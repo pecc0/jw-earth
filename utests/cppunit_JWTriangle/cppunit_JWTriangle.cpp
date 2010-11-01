@@ -18,6 +18,8 @@ class TestJWTriangle : public CPPUNIT_NS::TestFixture
 	CPPUNIT_TEST( testIsUpsideDepth0 );
 	CPPUNIT_TEST( testIsUpsideDepth9 );
 	CPPUNIT_TEST( testIsUpsideDepth9Upside );
+	CPPUNIT_TEST( testLeadVertex );
+	CPPUNIT_TEST( testCheckPole );
 	CPPUNIT_TEST_SUITE_END();
 
 
@@ -32,31 +34,41 @@ public:
 		/*Called after each test function*/
 	}
 
-protected:
+public:
 	/*Test functions go here*/
 	/*void testFunctionName() {...}*/
 
 	void testIsUpsideDepth0()
 	{
-		JWTriangle triangle(0b000, 0b001, 0b100, 0b010);
-
-		CPPUNIT_ASSERT( triangle.isUpside() );
+		CPPUNIT_ASSERT( JWTriangle::isUpside(0b000, 0) );
 	}
 
 	void testIsUpsideDepth9()
 	{
 		//100 is the start, with 4 appearances of 11 triangles
-		JWTriangle triangle(0b00111001111110101100100, 0b001, 0b100, 0b010);
-		triangle.setIteration(9);
-		CPPUNIT_ASSERT( !triangle.isUpside() );
+		CPPUNIT_ASSERT( !JWTriangle::isUpside(0b00111001111110101100100, 9) );
 	}
 
 	void testIsUpsideDepth9Upside()
 	{
 		//010 is the start, with 4 appearances of 11 triangles
-		JWTriangle triangle(0b00111001111110101100010, 0b001, 0b100, 0b010);
-		triangle.setIteration(9);
-		CPPUNIT_ASSERT( triangle.isUpside() );
+		CPPUNIT_ASSERT( JWTriangle::isUpside(0b00111001111110101100010, 9) );
+	}
+	void testLeadVertex()
+	{
+		//010 is the start, with 4 appearances of 11 triangles
+		CPPUNIT_ASSERT_EQUAL(5, JWTriangle::getLeadVertex(0b1111001, 2) );
+	}
+
+	void testCheckPole() {
+		//north pole
+		CPPUNIT_ASSERT_EQUAL(1,  JWTriangle::checkPole(0b0101010101011, 5));
+		//south pole
+		CPPUNIT_ASSERT_EQUAL(-1, JWTriangle::checkPole(0b000000000000111, 6));
+		CPPUNIT_ASSERT_EQUAL(-1, JWTriangle::checkPole(0b1010101010110, 5));
+
+		//around the equator
+		CPPUNIT_ASSERT_EQUAL(0,  JWTriangle::checkPole(0b000000000000110, 5));
 	}
 };
 
@@ -64,6 +76,9 @@ CPPUNIT_TEST_SUITE_REGISTRATION( TestJWTriangle );
 
 int main()
 {
+	//TestJWTriangle test;
+	//test.testLeadVertex();
+
 	CPPUNIT_NS::TestResult testResult;
 	CPPUNIT_NS::TestResultCollector testsCollector;
 	testResult.addListener( &testsCollector );

@@ -1,42 +1,37 @@
 /*
  * JWSphere.h
  *
- *  Created on: Oct 18, 2010
+ *  Created on: Oct 26, 2010
  *      Author: Petko
  */
 
 #ifndef JWSPHERE_H_
 #define JWSPHERE_H_
 
-#include "ISceneNode.h"
 #include <irrlicht.h>
+#include "AutoCleanHashMap.h"
 #include "JWTriangle.h"
-#include <hash_map>
+#include "IJWLogger.h"
 
 using namespace irr;
-using namespace __gnu_cxx;
 
-#ifdef _MSC_VER
-#pragma comment(lib, "Irrlicht.lib")
-#endif
 
-struct UnsignedHash
+//At what level triangles and vertexes are not deleted
+#define PERSISTENT_CACHED_LEVEL 7
+
+#define SPHERE_RADIUS 20.0
+
+typedef int Direction;
+
+#define DIR_LEFT 0b00
+#define DIR_RIGHT 0b01
+#define DIR_UP 0b10
+#define DIR_DOWN 0b11
+
+namespace jw
 {
-	size_t operator()(const u32 __s) const
-	{
-		return __s;
-	}
-};
 
-struct UnsignedEquals
-{
-	size_t operator()(const u32& __x, const u32& __y) const
-	{
-		return __x == __y;
-	}
-};
-
-typedef hash_map<u32, JWTriangle, UnsignedHash, UnsignedEquals> TrianglesMap;
+using namespace log;
 
 /**
  * We will tessellate the sphere into triangles. We start the tessellation from an octahedron.
@@ -50,35 +45,34 @@ typedef hash_map<u32, JWTriangle, UnsignedHash, UnsignedEquals> TrianglesMap;
  * from the vertex. We globally index the vertextes in following way:
  * The vertex receives its index from the triangle for which this vertex is at number 0 in the
  * internal numbering. In most cases, there are 2 triangles for which the vertex is at number 0.
- * So then we choose the triangle which is "upside" (see JWTriangle::isUpside). We choose
- * the initial octahedron so that there isn't a vertex with 2 upside triangles for which the
- * vertex is 0. This is possible. At next iterations, it is always true that if there are 2
- * triangles for which the vertex is at 0, one of them is upside, the other is not.
+ * So then we choose the triangle with lower index of the 2.
  */
-class JWSphere: public irr::scene::ISceneNode
+
+class JWSphere
 {
-	core::aabbox3d<f32> m_Box;
-	video::S3DVertex m_OctahedronVertices[8];
-    video::SMaterial m_Material;
-    TrianglesMap m_mapOctahedronTriangles;
-    u32 * m_vIndices;
-    void init();
-    void clear();
+	AutoCleanHashMap<core::vector3df> m_mapVertices;
+	AutoCleanHashMap<JWTriangle> m_vmapTriangles[MAX_TRIANGLE_LEVELS];
+    IJWLogger *log;
 public:
     JWSphere();
-    JWSphere(scene::ISceneNode *parent, scene::ISceneManager *mgr, s32 id);
     virtual ~JWSphere();
-    virtual void OnRegisterSceneNode();
-    virtual void render();
-    const virtual core::aabbox3d<f32>& getBoundingBox() const;
+    core::vector3df *getVertex(u32 key);
+    JWTriangle *getTriangle(u32 key, int level);
+    u32 getTriangleVertex(u32 triangle, int level, int i, bool preventGeneration = false);
+    void divideTriangle(u32 triangle, int level);
 
-	virtual u32 getMaterialCount();
+    int getTilesRow(u32 startTriangle, int level, int left, int right, u32* result);
 
-	virtual video::SMaterial& getMaterial(u32 i);
+    /**
+     * Returns the triangles from a part of the sphere surface
+     * \param startTriangle Triangle inside the required area
+     * \param left, right, up, down How many tiles to each of the directions from the startTriangle are required
+     * \param result Pointer to receive the triangle IDs
+     * \return the number of triangles returned
+     */
+    int getTilesSquare(u32 startTriangle, int level, int left, int right, int up, int down, u32* result);
 
-	u32 getTriangleVertex(u32 triangle, int i);
-
-	void generateIndeces();
+    u32 getNeighborTriangle(u32 triangle, int level, Direction dir);
 };
-
+}
 #endif /* JWSPHERE_H_ */
