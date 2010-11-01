@@ -20,7 +20,7 @@
  and tell the linker to link with the .lib file.
  */
 #include <irrlicht.h>
-#include "driverChoice.h"
+//#include "driverChoice.h"
 #include "EarthVisualization.h"
 
 using namespace irr;

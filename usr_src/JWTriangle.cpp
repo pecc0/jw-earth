@@ -178,7 +178,7 @@ int JWTriangle::getLeadVertex(u32 trIndex, int level)
 int JWTriangle::checkPole(u32 trIndex, int level)
 {
 	u32 octahedronTriangle = trIndex & 0b111; //level 0 parent of this triangle
-	int topVertex = s_vOctahedronTrianglesLeadVerteces[octahedronTriangle] & 0b11;
+	u32 topVertex = s_vOctahedronTrianglesLeadVerteces[octahedronTriangle] & 0b11;
 	while (level > 0)
 	{
 		//near the pole, all subtriangle indexes must be equal to the lead vertex of the
