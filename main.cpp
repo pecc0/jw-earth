@@ -22,8 +22,10 @@
 #include <irrlicht.h>
 //#include "driverChoice.h"
 #include "EarthVisualization.h"
+#include "irrlitch/JWSceneNodeAnimatorCameraFPS.h"
 
 using namespace irr;
+using namespace irr::scene;
 
 #ifdef _MSC_VER
 #pragma comment(lib, "Irrlicht.lib")
@@ -56,15 +58,22 @@ int main()
 	scene::ISceneManager* smgr = device->getSceneManager();
 
 	// add a camera scene node
-	scene::ICameraSceneNode* camera = smgr->addCameraSceneNodeMaya();
+	scene::ICameraSceneNode* camera = smgr->addCameraSceneNodeFPS();
+	//scene::ICameraSceneNode* camera = addCameraSceneNodeFPS(smgr);
+
+	JWSceneNodeAnimatorCameraFPS::injectOnFPSCamera(camera);
 
 	camera->setFarValue(20000.f);
+	camera->setPosition(core::vector3df(0,0,-200));
+	camera->setTarget(core::vector3df(0,30,0));
+
+	//camera->setFarValue(20000.f);
 
 	//camera->setPosition(core::vector3df(0,0,-200));
 
 	// Maya cameras reposition themselves relative to their target, so target the location
 	// where the mesh scene node is placed.
-	camera->setTarget(core::vector3df(0, 0, 0));
+	//camera->setTarget(core::vector3df(0, 0, 0));
 
 	//smgr->addCameraSceneNode(0, core::vector3df(0,-40,0), core::vector3df(0,0,0));
 
