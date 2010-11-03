@@ -24,12 +24,78 @@
 #include "EarthVisualization.h"
 #include "irrlitch/JWSceneNodeAnimatorCameraFPS.h"
 
+using namespace core;
 using namespace irr;
 using namespace irr::scene;
+using namespace gui;
 
 #ifdef _MSC_VER
 #pragma comment(lib, "Irrlicht.lib")
 #endif
+
+enum
+{
+	GUI_ID_TRANSPARENCY_SCROLL_BAR = 101
+};
+
+#define GUI_X 5
+#define GUI_Y 5
+
+IrrlichtDevice *g_Device;
+JWSceneNodeAnimatorCameraFPS* g_CameraAnimator;
+
+class MyEventReceiver: public IEventReceiver
+{
+public:
+	virtual bool OnEvent(const SEvent& event)
+	{
+		// Escape swaps Camera Input
+		if (event.EventType == EET_KEY_INPUT_EVENT
+				&& event.KeyInput.PressedDown == false)
+		{
+			if (event.KeyInput.Key == irr::KEY_ESCAPE)
+			{
+				if (g_Device)
+				{
+					scene::ICameraSceneNode * camera =
+							g_Device->getSceneManager()->getActiveCamera();
+					if (camera)
+					{
+						camera->setInputReceiverEnabled(
+								!camera->isInputReceiverEnabled());
+					}
+					return true;
+				}
+			}
+		}
+		else if (event.EventType == EET_GUI_EVENT)
+		{
+			s32 id = event.GUIEvent.Caller->getID();
+			//IGUIEnvironment* env = g_Device->getGUIEnvironment();
+			switch (event.GUIEvent.EventType)
+			{
+			case EGET_SCROLL_BAR_CHANGED:
+				if (id == GUI_ID_TRANSPARENCY_SCROLL_BAR)
+				{
+					const s32 pos =
+							((IGUIScrollBar*) event.GUIEvent.Caller)->getPos();
+					g_CameraAnimator->setMoveSpeed(pos / 10000.0);
+				}
+				break;
+			default:
+				break;
+			}
+
+		}
+		else if (event.EventType == EET_USER_EVENT)
+		{
+			//event.UserEvent.UserData1
+			int a = 1;
+		}
+
+		return false;
+	}
+};
 
 /*
  That's it. The Scene node is done. Now we simply have to start
@@ -44,28 +110,59 @@ int main()
 
 	// create device
 
-	IrrlichtDevice *device = createDevice(driverType, core::dimension2d<u32>(
-			640, 480), 16, false);
+	MyEventReceiver receiver;
 
-	if (device == 0)
+	g_Device = createDevice(driverType, core::dimension2d<u32>(640, 480), 16,
+			false, false, false, &receiver);
+
+	if (g_Device == 0)
 		return 1; // could not create selected driver.
 
 	// create engine and camera
 
-	device->setWindowCaption(L"Custom Scene Node - Irrlicht Engine Demo");
+	g_Device->setWindowCaption(L"Custom Scene Node - Irrlicht Engine Demo");
 
-	video::IVideoDriver* driver = device->getVideoDriver();
-	scene::ISceneManager* smgr = device->getSceneManager();
+	video::IVideoDriver* driver = g_Device->getVideoDriver();
+	scene::ISceneManager* smgr = g_Device->getSceneManager();
+
+	IGUIEnvironment* env = g_Device->getGUIEnvironment();
+
+	IGUISkin* skin = env->getSkin();
+	IGUIFont* font = env->getFont("../../media/fonthaettenschweiler.bmp");
+	if (font)
+		skin->setFont(font);
+
+	skin->setFont(env->getBuiltInFont(), EGDF_TOOLTIP);
+
+	env->addStaticText(L"Movement speed:", rect<s32> (GUI_X, GUI_Y,
+			GUI_X + 200, GUI_Y + 20), true);
+	IGUIScrollBar* scrollbar = env->addScrollBar(true, rect<s32> (GUI_X, GUI_Y
+			+ 25, GUI_X + 200, GUI_Y + 45), 0, GUI_ID_TRANSPARENCY_SCROLL_BAR);
+	scrollbar->setMax(500);
+	scrollbar->setMin(1);
+
+	scrollbar->setPos(255);
 
 	// add a camera scene node
 	scene::ICameraSceneNode* camera = smgr->addCameraSceneNodeFPS();
 	//scene::ICameraSceneNode* camera = addCameraSceneNodeFPS(smgr);
 
-	JWSceneNodeAnimatorCameraFPS::injectOnFPSCamera(camera);
+	g_CameraAnimator = JWSceneNodeAnimatorCameraFPS::injectOnFPSCamera(camera);
+	g_CameraAnimator->setMoveSpeed(scrollbar->getPos() / 5000.0);
+
+	SKeyMap keyMap[] =
+	{
+	{ EKA_MOVE_FORWARD, KEY_KEY_W },
+	{ EKA_MOVE_BACKWARD, KEY_KEY_S },
+	{ EKA_STRAFE_LEFT, KEY_KEY_A },
+	{ EKA_STRAFE_RIGHT, KEY_KEY_D },
+	{ EKA_JUMP_UP, KEY_SPACE },
+	{ EKA_CROUCH, KEY_LSHIFT }, };
+	g_CameraAnimator->setKeyMap(keyMap, 6);
 
 	camera->setFarValue(20000.f);
-	camera->setPosition(core::vector3df(0,0,-200));
-	camera->setTarget(core::vector3df(0,30,0));
+	camera->setPosition(core::vector3df(0, 0, -200));
+	camera->setTarget(core::vector3df(0, 30, 0));
 
 	//camera->setFarValue(20000.f);
 
@@ -86,7 +183,8 @@ int main()
 	 to drop it only *after* I have finished using it, regardless of what
 	 the reference count of the object is after creation.
 	 */
-	EarthVisualization *myNode = new EarthVisualization(smgr->getRootSceneNode(), smgr, 666);
+	EarthVisualization *myNode = new EarthVisualization(
+			smgr->getRootSceneNode(), smgr, 666);
 
 	/*
 	 To animate something in this boring scene consisting only of one
@@ -127,11 +225,13 @@ int main()
 	 Now draw everything and finish.
 	 */
 	u32 frames = 0;
-	while (device->run())
+	while (g_Device->run())
 	{
 		driver->beginScene(true, true, video::SColor(0, 100, 100, 100));
 
 		smgr->drawAll();
+
+		env->drawAll();
 
 		driver->endScene();
 		if (++frames == 100)
@@ -141,12 +241,12 @@ int main()
 			str += L"] FPS: ";
 			str += (s32) driver->getFPS();
 
-			device->setWindowCaption(str.c_str());
+			g_Device->setWindowCaption(str.c_str());
 			frames = 0;
 		}
 	}
 
-	device->drop();
+	g_Device->drop();
 
 	return 0;
 }
