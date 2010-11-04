@@ -10,6 +10,8 @@
 
 #include "ISceneNodeAnimatorCameraFPS.h"
 #include "ICameraSceneNode.h"
+#include "SKeyMap.h"
+#include <map>
 
 namespace irr
 {
@@ -26,6 +28,9 @@ class JWSceneNodeAnimatorCameraFPS: public ISceneNodeAnimatorCameraFPS
 private:
 	ISceneNodeAnimatorCameraFPS* m_Wrapped;
 	IEventReceiver* m_animationEventsReceiver;
+	typedef std::map<EKEY_CODE, s32> TKeyMap;
+	TKeyMap KeyMap;
+	bool CursorKeys[EKA_COUNT];
 public:
 	JWSceneNodeAnimatorCameraFPS(ISceneNodeAnimatorCameraFPS* wrapped);
 	virtual ~JWSceneNodeAnimatorCameraFPS();
