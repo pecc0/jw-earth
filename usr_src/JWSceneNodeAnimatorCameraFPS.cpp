@@ -14,7 +14,7 @@ namespace scene
 
 JWSceneNodeAnimatorCameraFPS::JWSceneNodeAnimatorCameraFPS(
 		ISceneNodeAnimatorCameraFPS* wrapped) :
-	m_Wrapped(wrapped)
+	m_Wrapped(wrapped), m_animationEventsReceiver(0)
 {
 	m_Wrapped->grab();
 }
@@ -56,9 +56,20 @@ bool JWSceneNodeAnimatorCameraFPS::OnEvent(const SEvent & event)
 
 void JWSceneNodeAnimatorCameraFPS::animateNode(ISceneNode *node, u32 timeMs)
 {
-	m_Wrapped->animateNode(node, timeMs);
-}
+	core::vector3df pos = node->getPosition();
 
+	m_Wrapped->animateNode(node, timeMs);
+
+	if (m_animationEventsReceiver && pos != node->getPosition())
+	{
+		SEvent event;
+		event.EventType = EET_USER_EVENT;
+		event.UserEvent.UserData1 = ANIMATION_MOVE_EVENT;
+		event.UserEvent.UserData2 = (irr::s32)node;
+		//event.even
+		m_animationEventsReceiver->OnEvent(event);
+	}
+}
 
 void JWSceneNodeAnimatorCameraFPS::setVerticalMovement(bool allow)
 {
@@ -69,32 +80,47 @@ ISceneNodeAnimator *JWSceneNodeAnimatorCameraFPS::createClone(ISceneNode *node,
 {
 
 	return new JWSceneNodeAnimatorCameraFPS(
-			(ISceneNodeAnimatorCameraFPS*)((m_Wrapped->createClone(node, newManager))));
-    }
+			(ISceneNodeAnimatorCameraFPS*) ((m_Wrapped->createClone(node,
+					newManager))));
+}
 
-    void JWSceneNodeAnimatorCameraFPS::setInvertMouse(bool invert)
-    {
-        m_Wrapped->setInvertMouse(invert);
-    }
+void JWSceneNodeAnimatorCameraFPS::setInvertMouse(bool invert)
+{
+	m_Wrapped->setInvertMouse(invert);
+}
 
-    JWSceneNodeAnimatorCameraFPS *JWSceneNodeAnimatorCameraFPS::injectOnFPSCamera(ICameraSceneNode *fpsCamera)
-    {
-        JWSceneNodeAnimatorCameraFPS *result = new JWSceneNodeAnimatorCameraFPS((ISceneNodeAnimatorCameraFPS*)(((((*(fpsCamera->getAnimators().begin())))))));
-        fpsCamera->removeAnimators();
-        fpsCamera->addAnimator(result);
-        result->drop();
-        return result;
-    }
+JWSceneNodeAnimatorCameraFPS *JWSceneNodeAnimatorCameraFPS::injectOnFPSCamera(
+		ICameraSceneNode *fpsCamera)
+{
+	JWSceneNodeAnimatorCameraFPS
+			*result =
+					new JWSceneNodeAnimatorCameraFPS(
+							(ISceneNodeAnimatorCameraFPS*) (((((*(fpsCamera->getAnimators().begin())))))));
+	fpsCamera->removeAnimators();
+	fpsCamera->addAnimator(result);
+	result->drop();
+	return result;
+}
 
-    bool JWSceneNodeAnimatorCameraFPS::hasFinished(void)
-    {
-        return m_Wrapped->hasFinished();
-    }
+bool JWSceneNodeAnimatorCameraFPS::hasFinished(void)
+{
+	return m_Wrapped->hasFinished();
+}
 
-    ESCENE_NODE_ANIMATOR_TYPE JWSceneNodeAnimatorCameraFPS::getType() const
-    {
-    	return m_Wrapped->getType();
-    }
+ESCENE_NODE_ANIMATOR_TYPE JWSceneNodeAnimatorCameraFPS::getType() const
+{
+	return m_Wrapped->getType();
+}
+
+IEventReceiver *JWSceneNodeAnimatorCameraFPS::getAnimationEventsReceiver() const
+{
+    return m_animationEventsReceiver;
+}
+
+void JWSceneNodeAnimatorCameraFPS::setAnimationEventsReceiver(IEventReceiver *m_animationEventsReceiver)
+{
+    this->m_animationEventsReceiver = m_animationEventsReceiver;
+}
 
 }
 }

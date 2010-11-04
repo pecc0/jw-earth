@@ -89,8 +89,12 @@ public:
 		}
 		else if (event.EventType == EET_USER_EVENT)
 		{
-			//event.UserEvent.UserData1
-			int a = 1;
+			if (event.UserEvent.UserData1 == ANIMATION_MOVE_EVENT)
+			{
+				ISceneNode* node = (ISceneNode*) event.UserEvent.UserData2;
+				node->getPosition();
+			}
+
 		}
 
 		return false;
@@ -149,6 +153,7 @@ int main()
 
 	g_CameraAnimator = JWSceneNodeAnimatorCameraFPS::injectOnFPSCamera(camera);
 	g_CameraAnimator->setMoveSpeed(scrollbar->getPos() / 5000.0);
+	g_CameraAnimator->setAnimationEventsReceiver(&receiver);
 
 	SKeyMap keyMap[] =
 	{
@@ -157,7 +162,7 @@ int main()
 	{ EKA_STRAFE_LEFT, KEY_KEY_A },
 	{ EKA_STRAFE_RIGHT, KEY_KEY_D },
 	{ EKA_JUMP_UP, KEY_SPACE },
-	{ EKA_CROUCH, KEY_LSHIFT }, };
+	{ EKA_CROUCH, KEY_LSHIFT } };
 	g_CameraAnimator->setKeyMap(keyMap, 6);
 
 	camera->setFarValue(20000.f);

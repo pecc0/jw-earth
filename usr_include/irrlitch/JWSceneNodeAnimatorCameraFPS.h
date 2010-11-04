@@ -16,10 +16,16 @@ namespace irr
 namespace scene
 {
 
+enum
+{
+	ANIMATION_MOVE_EVENT = 300
+};
+
 class JWSceneNodeAnimatorCameraFPS: public ISceneNodeAnimatorCameraFPS
 {
 private:
 	ISceneNodeAnimatorCameraFPS* m_Wrapped;
+	IEventReceiver* m_animationEventsReceiver;
 public:
 	JWSceneNodeAnimatorCameraFPS(ISceneNodeAnimatorCameraFPS* wrapped);
 	virtual ~JWSceneNodeAnimatorCameraFPS();
@@ -75,6 +81,11 @@ public:
 	{
 		return true;
 	}
+
+	IEventReceiver *getAnimationEventsReceiver() const;
+
+	void setAnimationEventsReceiver(IEventReceiver *m_animationEventsReceiver);
+
 };
 }
 }

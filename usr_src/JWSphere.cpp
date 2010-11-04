@@ -286,17 +286,19 @@ int jw::JWSphere::getTilesRow(u32 startTriangle, int level, int left,
 	u32 currentTr = startTriangle;
 	*result = startTriangle;
 	++result;
+	Direction dir = DIR_LEFT;
 	while (left)
 	{
-		currentTr = getNeighborTriangle(currentTr, level, DIR_LEFT);
+		currentTr = getNeighborTriangle(currentTr, level, dir);
 		*result = currentTr;
 		++result;
 		--left;
 	}
 	currentTr = startTriangle;
+	dir = DIR_RIGHT;
 	while (right)
 	{
-		currentTr = getNeighborTriangle(currentTr, level, DIR_RIGHT);
+		currentTr = getNeighborTriangle(currentTr, level, dir);
 		*result = currentTr;
 		++result;
 		--right;
@@ -304,24 +306,26 @@ int jw::JWSphere::getTilesRow(u32 startTriangle, int level, int left,
 	return result - resultBase;
 }
 
-int jw::JWSphere::getTilesSquare(u32 startTriangle, int level, int left, int right, int up,
-		int down, u32 *result)
+int jw::JWSphere::getTilesSquare(u32 startTriangle, int level, int left,
+		int right, int up, int down, u32 *result)
 {
 	u32 *resultBase = result;
 	u32 currentTr = startTriangle;
 	int added = getTilesRow(currentTr, level, left, right, result);
 	result += added;
+	Direction dir = DIR_UP;
 	while (up)
 	{
-		currentTr = getNeighborTriangle(currentTr, level, DIR_UP);
+		currentTr = getNeighborTriangle(currentTr, level, dir);
 		added = getTilesRow(currentTr, level, left, right, result);
 		result += added;
 		--up;
 	}
 	currentTr = startTriangle;
+	dir = DIR_DOWN;
 	while (down)
 	{
-		currentTr = getNeighborTriangle(currentTr, level, DIR_DOWN);
+		currentTr = getNeighborTriangle(currentTr, level, dir);
 		added = getTilesRow(currentTr, level, left, right, result);
 		result += added;
 		--down;
@@ -329,8 +333,10 @@ int jw::JWSphere::getTilesSquare(u32 startTriangle, int level, int left, int rig
 	return result - resultBase;
 }
 
-u32 jw::JWSphere::getNeighborTriangle(u32 triangle, int level, Direction dir)
+u32 jw::JWSphere::getNeighborTriangle(u32 triangle, int level,
+		Direction& rwDirection)
 {
+	Direction dir = rwDirection;
 	JWTriangle* tr = getTriangle(triangle, level);
 	int leadVertex = JWTriangle::getLeadVertex(triangle, level);
 	int isUpside = leadVertex >> 2;
@@ -341,31 +347,33 @@ u32 jw::JWSphere::getNeighborTriangle(u32 triangle, int level, Direction dir)
 		if ((isUpside ^ dir) & 0b01)
 		{
 			//if the triangle is upside and we go up, or the triangle is downside and we go down
+
+			int passedTriangles = 3;
 			int atPole = JWTriangle::checkPole(triangle, level);
 			if (atPole)
 			{
-				return 0;
+				passedTriangles = 2;
+				rwDirection = dir ^ 0b01; //if we were going up, we must start going down and vice versa
 			}
-			else
+
+			//go round the lead vertex
+			int edge = leadVertex;
+			for (int j = 0; j < passedTriangles; j++)
 			{
-				//go round the lead vertex
-				int edge = leadVertex;
-				for (int j = 0; j < 3; j++)
-				{
-					u32 neighbIndex = tr->getNeighbour(edge);
-					JWTriangle * neighb = getTriangle(neighbIndex, level);
+				u32 neighbIndex = tr->getNeighbour(edge);
+				JWTriangle * neighb = getTriangle(neighbIndex, level);
 
-					//what is the index of current triangle in the neighbor's list
-					int nghbEdge = neighb->getNeighborInternalIndex(triangle);
+				//what is the index of current triangle in the neighbor's list
+				int nghbEdge = neighb->getNeighborInternalIndex(triangle);
 
-					//go counterclockwise in and continue with the neighbor.
-					//This ensures we rotate around the same vertex
-					edge = (nghbEdge + 1) % 3;
-					triangle = neighbIndex;
-					tr = neighb;
-				}
-				return triangle;
+				//go counterclockwise in and continue with the neighbor.
+				//This ensures we rotate around the same vertex
+				edge = (nghbEdge + 1) % 3;
+				triangle = neighbIndex;
+				tr = neighb;
 			}
+			return triangle;
+
 		}
 		else
 		{

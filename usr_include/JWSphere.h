@@ -72,7 +72,12 @@ public:
      */
     int getTilesSquare(u32 startTriangle, int level, int left, int right, int up, int down, u32* result);
 
-    u32 getNeighborTriangle(u32 triangle, int level, Direction dir);
+    /**
+     * Returns a neighbor triangle of certain triangle at certain level.
+     * If the neighbor triangle is beyond a pole (happens only in case we go up or down),
+     * will also change the direction accordingly
+     */
+    u32 getNeighborTriangle(u32 triangle, int level, Direction& rwDirection);
 };
 }
 #endif /* JWSPHERE_H_ */
