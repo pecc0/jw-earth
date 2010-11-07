@@ -109,7 +109,7 @@ void EarthVisualization::generateMesh()
 
 	int level = 3;
 
-	g_TrCount = m_Sphere.getTilesSquare(0b000, level, 6, 6, 4, 4,
+	g_TrCount = m_Sphere.getTilesSquare(0b000, level, 16, 16, 8, 8,
 			g_TrianglesBuf);
 	if (g_TrCount > 1000) {
 		return;

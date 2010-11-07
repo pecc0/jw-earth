@@ -401,3 +401,24 @@ u32 jw::JWSphere::getNeighborTriangle(u32 triangle, int level,
 	}
 }
 
+u32 octahedronTriangleFromPoint(const core::vector3df & point)
+{
+	//TODO translate the point if the sphere center is not at (0,0,0)
+	u32 result = 0;
+
+	//TODO optimize
+	if (point.Z > 0 ) {
+		result |= 0b001;
+	}
+	if (point.X > 0 ) {
+		result |= 0b010;
+	}
+	if (point.Y < 0 ) {
+		result |= 0b100;
+	}
+	return result;
+}
+
+
+
+
