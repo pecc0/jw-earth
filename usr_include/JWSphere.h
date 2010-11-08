@@ -80,6 +80,8 @@ public:
     u32 getNeighborTriangle(u32 triangle, int level, Direction& rwDirection);
 
     u32 octahedronTriangleFromPoint(const core::vector3df & point);
+
+    u32 getSubtriangleUnderPoint(u32 triangle, int level, const core::vector3df & point);
 };
 }
 #endif /* JWSPHERE_H_ */

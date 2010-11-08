@@ -401,7 +401,7 @@ u32 jw::JWSphere::getNeighborTriangle(u32 triangle, int level,
 	}
 }
 
-u32 octahedronTriangleFromPoint(const core::vector3df & point)
+u32 jw::JWSphere::octahedronTriangleFromPoint(const core::vector3df & point)
 {
 	//TODO translate the point if the sphere center is not at (0,0,0)
 	u32 result = 0;
@@ -418,6 +418,28 @@ u32 octahedronTriangleFromPoint(const core::vector3df & point)
 	}
 	return result;
 }
+
+u32 jw::JWSphere::getSubtriangleUnderPoint(u32 triangle, int level, const core::vector3df & point)
+{
+	f32 projection[3];
+	u32 vindex[2];
+	core::vector3df* vbuf[2];
+	vindex[0] = getTriangleVertex(triangle, level, 0, false);
+	vbuf[0] = getVertex(vindex[0]);
+	for (int i = 0; i < 3; i++) {
+		int bufIndx0 = i % 2;
+		int bufIndx1 = (i + 1) % 2;
+		vindex[bufIndx1] = getTriangleVertex(triangle, level, i, false);
+		vbuf[bufIndx1] = getVertex(vindex[bufIndx1]);
+		f32 d0 = vbuf[bufIndx0]->getDistanceFrom(point);
+		f32 d1 = vbuf[bufIndx1]->getDistanceFrom(point);
+		projection[i] = (d0 - d1) / 2.0;
+
+	}
+	return 0;
+}
+
+
 
 
 
