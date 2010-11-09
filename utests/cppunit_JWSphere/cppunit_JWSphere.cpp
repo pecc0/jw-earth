@@ -13,6 +13,8 @@
 
 using namespace jw;
 
+#define PRECISION 0.00001
+
 class TestJWSphere: public CPPUNIT_NS::TestFixture
 {
 CPPUNIT_TEST_SUITE( TestJWSphere );
@@ -22,6 +24,9 @@ CPPUNIT_TEST_SUITE( TestJWSphere );
 		CPPUNIT_TEST( testGetTriangle );
 		CPPUNIT_TEST( testGetTriangle1 );
 		CPPUNIT_TEST( testGetNeighborTriangle );
+		CPPUNIT_TEST( buildTetrahedronBarycentricMatrixTrivial );
+		CPPUNIT_TEST( buildTetrahedronBarycentricMatrixTrivial1 );
+		CPPUNIT_TEST( buildTetrahedronBarycentricMatrix );
 	CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -68,7 +73,8 @@ public:
 		CPPUNIT_ASSERT_EQUAL((u32)0b110, shpere.getTriangleVertex(0b111, 0, 2));
 	}
 
-	void testLvl1GetTriangleVertex() {
+	void testLvl1GetTriangleVertex()
+	{
 		JWSphere shpere;
 		CPPUNIT_ASSERT_EQUAL((u32)0b00000, shpere.getTriangleVertex(0b00000, 1, 0, true));
 		CPPUNIT_ASSERT_EQUAL((u32)0b01000, shpere.getTriangleVertex(0b00000, 1, 1, true));
@@ -78,14 +84,16 @@ public:
 		CPPUNIT_ASSERT_EQUAL((u32)0b10100, shpere.getTriangleVertex(0b01110, 1, 2, true));
 	}
 
-	void testGetTriangle() {
+	void testGetTriangle()
+	{
 		JWSphere shpere;
 		JWTriangle * tr = shpere.getTriangle(0b00010, 1);
 		CPPUNIT_ASSERT_EQUAL((u32)0b01110, tr->getNeighbour(0));
 		CPPUNIT_ASSERT_EQUAL((u32)0b11010, tr->getNeighbour(1));
 		CPPUNIT_ASSERT_EQUAL((u32)0b10000, tr->getNeighbour(2));
 	}
-	void testGetTriangle1() {
+	void testGetTriangle1()
+	{
 		JWSphere shpere;
 		JWTriangle * tr = shpere.getTriangle(0b01000, 1);
 		CPPUNIT_ASSERT_EQUAL((u32)0b00001, tr->getNeighbour(0));
@@ -93,17 +101,119 @@ public:
 		CPPUNIT_ASSERT_EQUAL((u32)0b11000, tr->getNeighbour(2));
 	}
 
-	void testGetNeighborTriangle() {
+	void testGetNeighborTriangle()
+	{
 		JWSphere shpere;
 
-		CPPUNIT_ASSERT_EQUAL((u32)0b1101001, shpere.getNeighborTriangle(0b1111001, 2, DIR_UP));
+		Direction d;
 
-		CPPUNIT_ASSERT_EQUAL((u32)0b0111101, shpere.getNeighborTriangle(0b0111001, 2, DIR_DOWN));
+		CPPUNIT_ASSERT_EQUAL((u32)0b1101001, shpere.getNeighborTriangle(0b1111001, 2, d = DIR_UP));
 
-		CPPUNIT_ASSERT_EQUAL((u32)0b00001001, shpere.getNeighborTriangle(0b00001000, 2, DIR_UP));
+		CPPUNIT_ASSERT_EQUAL((u32)0b0111101, shpere.getNeighborTriangle(0b0111001, 2, d = DIR_DOWN));
 
-		CPPUNIT_ASSERT_EQUAL((u32)0b101010101, shpere.getNeighborTriangle(0b001, 3, DIR_DOWN));
+		CPPUNIT_ASSERT_EQUAL((u32)0b00001001, shpere.getNeighborTriangle(0b00001000, 2, d = DIR_UP));
 
+		CPPUNIT_ASSERT_EQUAL((u32)0b101010101, shpere.getNeighborTriangle(0b001, 3, d = DIR_DOWN));
+
+	}
+
+	void buildTetrahedronBarycentricMatrixTrivial()
+	{
+		core::matrix4 matrT;
+
+		core::vector3df r1(1, 0, 0);
+		core::vector3df r2(0, 1, 0);
+		core::vector3df r3(0, 0, 1);
+		core::vector3df r4(0, 0, 0);
+
+		JWSphere::buildTetrahedronBarycentricMatrix(matrT, &r1, &r2, &r3, &r4);
+
+		core::vector3df result;
+		matrT.transformVect(result, r4);
+		CPPUNIT_ASSERT_DOUBLES_EQUAL(0, result.X, PRECISION);
+		CPPUNIT_ASSERT_DOUBLES_EQUAL(0, result.Y, PRECISION);
+		CPPUNIT_ASSERT_DOUBLES_EQUAL(0, result.Z, PRECISION);
+
+		matrT.transformVect(result, r1);
+		CPPUNIT_ASSERT_DOUBLES_EQUAL(1, result.X, PRECISION);
+		CPPUNIT_ASSERT_DOUBLES_EQUAL(0, result.Y, PRECISION);
+		CPPUNIT_ASSERT_DOUBLES_EQUAL(0, result.Z, PRECISION);
+
+		matrT.transformVect(result, r2);
+		CPPUNIT_ASSERT_DOUBLES_EQUAL(0, result.X, PRECISION);
+		CPPUNIT_ASSERT_DOUBLES_EQUAL(1, result.Y, PRECISION);
+		CPPUNIT_ASSERT_DOUBLES_EQUAL(0, result.Z, PRECISION);
+
+		matrT.transformVect(result, r3);
+		CPPUNIT_ASSERT_DOUBLES_EQUAL(0, result.X, PRECISION);
+		CPPUNIT_ASSERT_DOUBLES_EQUAL(0, result.Y, PRECISION);
+		CPPUNIT_ASSERT_DOUBLES_EQUAL(1, result.Z, PRECISION);
+	}
+
+	void buildTetrahedronBarycentricMatrixTrivial1()
+	{
+		core::matrix4 matrT;
+
+		core::vector3df r1(1, 0, 0);
+		core::vector3df r2(0, 1, 0);
+		core::vector3df r3(0, 0, 3);
+		core::vector3df r4(0, 0, 2);
+
+		JWSphere::buildTetrahedronBarycentricMatrix(matrT, &r1, &r2, &r3, &r4);
+
+		core::vector3df result;
+		matrT.transformVect(result, r4);
+		CPPUNIT_ASSERT_DOUBLES_EQUAL(0, result.X, PRECISION);
+		CPPUNIT_ASSERT_DOUBLES_EQUAL(0, result.Y, PRECISION);
+		CPPUNIT_ASSERT_DOUBLES_EQUAL(0, result.Z, PRECISION);
+
+		matrT.transformVect(result, r1);
+		CPPUNIT_ASSERT_DOUBLES_EQUAL(1, result.X, PRECISION);
+		CPPUNIT_ASSERT_DOUBLES_EQUAL(0, result.Y, PRECISION);
+		CPPUNIT_ASSERT_DOUBLES_EQUAL(0, result.Z, PRECISION);
+
+		matrT.transformVect(result, r2);
+		CPPUNIT_ASSERT_DOUBLES_EQUAL(0, result.X, PRECISION);
+		CPPUNIT_ASSERT_DOUBLES_EQUAL(1, result.Y, PRECISION);
+		CPPUNIT_ASSERT_DOUBLES_EQUAL(0, result.Z, PRECISION);
+
+		matrT.transformVect(result, r3);
+		CPPUNIT_ASSERT_DOUBLES_EQUAL(0, result.X, PRECISION);
+		CPPUNIT_ASSERT_DOUBLES_EQUAL(0, result.Y, PRECISION);
+		CPPUNIT_ASSERT_DOUBLES_EQUAL(1, result.Z, PRECISION);
+	}
+
+	void buildTetrahedronBarycentricMatrix()
+	{
+		core::matrix4 matrT;
+
+		core::vector3df r1(6, 0, 0);
+		core::vector3df r2(0, 3, 1);
+		core::vector3df r3(0, 1, 4);
+		core::vector3df r4(2.1, 0, 2);
+
+		JWSphere::buildTetrahedronBarycentricMatrix(matrT, &r1, &r2, &r3, &r4);
+
+		core::vector3df result;
+		matrT.transformVect(result, r4);
+		CPPUNIT_ASSERT_DOUBLES_EQUAL(0, result.X, PRECISION);
+		CPPUNIT_ASSERT_DOUBLES_EQUAL(0, result.Y, PRECISION);
+		CPPUNIT_ASSERT_DOUBLES_EQUAL(0, result.Z, PRECISION);
+
+		matrT.transformVect(result, r1);
+		CPPUNIT_ASSERT_DOUBLES_EQUAL(1, result.X, PRECISION);
+		CPPUNIT_ASSERT_DOUBLES_EQUAL(0, result.Y, PRECISION);
+		CPPUNIT_ASSERT_DOUBLES_EQUAL(0, result.Z, PRECISION);
+
+		matrT.transformVect(result, r2);
+		CPPUNIT_ASSERT_DOUBLES_EQUAL(0, result.X, PRECISION);
+		CPPUNIT_ASSERT_DOUBLES_EQUAL(1, result.Y, PRECISION);
+		CPPUNIT_ASSERT_DOUBLES_EQUAL(0, result.Z, PRECISION);
+
+		matrT.transformVect(result, r3);
+		CPPUNIT_ASSERT_DOUBLES_EQUAL(0, result.X, PRECISION);
+		CPPUNIT_ASSERT_DOUBLES_EQUAL(0, result.Y, PRECISION);
+		CPPUNIT_ASSERT_DOUBLES_EQUAL(1, result.Z, PRECISION);
 	}
 };
 CPPUNIT_TEST_SUITE_REGISTRATION( TestJWSphere );
@@ -111,8 +221,7 @@ CPPUNIT_TEST_SUITE_REGISTRATION( TestJWSphere );
 int main()
 {
 	TestJWSphere test;
-	test.testGetNeighborTriangle();
-
+	//test.buildTetrahedronBarycentricMatrix();
 	CPPUNIT_NS::TestResult testResult;
 	CPPUNIT_NS::TestResultCollector testsCollector;
 	testResult.addListener(&testsCollector);

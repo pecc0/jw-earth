@@ -35,6 +35,13 @@ class EarthVisualization: public irr::scene::ISceneNode
 
     video::SMaterial m_Material;
 
+    u32 m_uTriangleUnderUs;
+    u32 m_vTriangleUnderUsPoints[3];
+
+    int m_nLevel;
+
+    core::vector3df m_vertViewerPoint;
+
     void init();
     void clear();
 public:
@@ -49,7 +56,13 @@ public:
 
 	virtual video::SMaterial& getMaterial(u32 i);
 
+
 	void generateMesh();
+	const core::vector3df& getViewerPoint() const;
+    void setViewerPoint(const core::vector3df& viewerPoint);
+    u32 getUTriangleUnderUs() const;
+    void setTriangleUnderUs(u32 m_uTriangleUnderUs);
+    void paintVertex(u32 vertexId, video::S3DVertex* v);
 };
 
 #endif /* EARTHVIS_H_ */

@@ -49,8 +49,11 @@ EarthVisualization::EarthVisualization(scene::ISceneNode* parent,
 void EarthVisualization::init()
 {
 	m_vIndices = 0;
+	m_nLevel = 4;
+	m_uTriangleUnderUs = 1;
+	setTriangleUnderUs(0);
 
-	generateMesh();
+	//generateMesh();
 }
 
 void EarthVisualization::clear()
@@ -107,11 +110,10 @@ void EarthVisualization::generateMesh()
 
 	clear();
 
-	int level = 3;
-
-	g_TrCount = m_Sphere.getTilesSquare(0b000, level, 16, 16, 8, 8,
+	g_TrCount = m_Sphere.getTilesSquare(0b000, m_nLevel, 16, 16, 8, 18,
 			g_TrianglesBuf);
-	if (g_TrCount > 1000) {
+	if (g_TrCount > 1000)
+	{
 		return;
 	}
 
@@ -123,18 +125,72 @@ void EarthVisualization::generateMesh()
 	{
 		for (int j = 2; j >= 0; --j)
 		{
-			u32 vertexId = m_Sphere.getTriangleVertex(g_TrianglesBuf[i], level,
-					j, false);
-			core::vector3df* ptrVertPos = m_Sphere.getVertex(vertexId);
-			video::S3DVertex vert(*ptrVertPos, *ptrVertPos,
-					video::SColor(255, 0, 255, 0), core::vector2d<f32>(0, 0));
-			vert.Normal.normalize();
+			u32 vertexId = m_Sphere.getTriangleVertex(g_TrianglesBuf[i],
+					m_nLevel, j, false);
+
 			int hash = m_vVerteces.hash(vertexId);
 			if (m_vVerteces.getPtrKeys()[hash] == EMPTY_KEY)
 			{
+				core::vector3df* ptrVertPos = m_Sphere.getVertex(vertexId);
+				video::S3DVertex vert(*ptrVertPos, *ptrVertPos, video::SColor(
+						255, 0, 255, 0), core::vector2d<f32>(0, 0));
+				vert.Normal.normalize();
+				paintVertex(vertexId, &vert);
 				m_vVerteces.put(vertexId, &vert);
 			}
+			else
+			{
+				video::S3DVertex* v = m_vVerteces.getPtrPool() + hash;
+				paintVertex(vertexId, v);
+			}
 			m_vIndices[k++] = hash;
+		}
+	}
+}
+
+const core::vector3df& EarthVisualization::getViewerPoint() const
+{
+	return m_vertViewerPoint;
+}
+
+void EarthVisualization::setViewerPoint(const core::vector3df& viewerPoint)
+{
+	this->m_vertViewerPoint = viewerPoint;
+	u32 triangleUnderUs = m_Sphere.getTriangleUnderPoint(m_nLevel,
+			m_vertViewerPoint);
+	setTriangleUnderUs(triangleUnderUs);
+
+}
+
+u32 EarthVisualization::getUTriangleUnderUs() const
+{
+	return m_uTriangleUnderUs;
+}
+
+void EarthVisualization::setTriangleUnderUs(u32 triangleUnderUs)
+{
+	if (triangleUnderUs != m_uTriangleUnderUs)
+	{
+		m_uTriangleUnderUs = triangleUnderUs;
+		for (int i = 0; i < 3; i++)
+		{
+			m_vTriangleUnderUsPoints[i] = m_Sphere.getTriangleVertex(
+					m_uTriangleUnderUs, m_nLevel, i, false);
+		}
+		generateMesh();
+	}
+
+}
+
+void EarthVisualization::paintVertex(u32 vertexId, video::S3DVertex *v)
+{
+	v->Color.setRed(0);
+	for (int i = 0; i < 3; i++)
+	{
+		if (m_vTriangleUnderUsPoints[i] == vertexId)
+		{
+			v->Color.setRed(255);
+			break;
 		}
 	}
 }

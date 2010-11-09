@@ -401,46 +401,114 @@ u32 jw::JWSphere::getNeighborTriangle(u32 triangle, int level,
 	}
 }
 
-u32 jw::JWSphere::octahedronTriangleFromPoint(const core::vector3df & point)
+u32 jw::JWSphere::octahedronTriangleUnderPoint(const core::vector3df & point)
 {
 	//TODO translate the point if the sphere center is not at (0,0,0)
 	u32 result = 0;
 
 	//TODO optimize
-	if (point.Z > 0 ) {
+	if (point.Z > 0)
+	{
 		result |= 0b001;
 	}
-	if (point.X > 0 ) {
+	if (point.X > 0)
+	{
 		result |= 0b010;
 	}
-	if (point.Y < 0 ) {
+	if (point.Y < 0)
+	{
 		result |= 0b100;
 	}
 	return result;
 }
 
-u32 jw::JWSphere::getSubtriangleUnderPoint(u32 triangle, int level, const core::vector3df & point)
+u32 jw::JWSphere::getSubtriangleUnderPoint(u32 triangle, int level,
+		const core::vector3df & point)
 {
-	f32 projection[3];
-	u32 vindex[2];
-	core::vector3df* vbuf[2];
-	vindex[0] = getTriangleVertex(triangle, level, 0, false);
-	vbuf[0] = getVertex(vindex[0]);
-	for (int i = 0; i < 3; i++) {
-		int bufIndx0 = i % 2;
-		int bufIndx1 = (i + 1) % 2;
-		vindex[bufIndx1] = getTriangleVertex(triangle, level, i, false);
-		vbuf[bufIndx1] = getVertex(vindex[bufIndx1]);
-		f32 d0 = vbuf[bufIndx0]->getDistanceFrom(point);
-		f32 d1 = vbuf[bufIndx1]->getDistanceFrom(point);
-		projection[i] = (d0 - d1) / 2.0;
+	core::vector3df* r1 = getVertex(
+			getTriangleVertex(triangle, level, 1, false));
+	core::vector3df* r2 = getVertex(
+			getTriangleVertex(triangle, level, 2, false));
+	core::vector3df* r3;
+	//The vertex 0 will be r4
+	core::vector3df* r4 = getVertex(
+			getTriangleVertex(triangle, level, 0, false));
 
+	core::vector3df bufR3;
+	{
+		//I'll calculate r3 so that r3 - r4 is orthogonal to the triangle surface, and |r3 - r4| = 1
+		//This way the third Barycentric coordinate will give exactly the distance from the point to
+		//the triangle surface in current coordinate system (not that we'll need that distance)
+		core::vector3df r1r4 = (*r1) - (*r4);
+		core::vector3df r2r4 = (*r2) - (*r4);
+		bufR3 = r1r4.crossProduct(r2r4).normalize();
+		bufR3 += (*r4);
 	}
-	return 0;
+	r3 = &bufR3;
+
+	core::matrix4 matrT;
+
+	buildTetrahedronBarycentricMatrix(matrT, r1, r2, r3, r4);
+
+	core::vector3df pointBarycentric;
+
+	matrT.transformVect(pointBarycentric, point);
+
+	if (pointBarycentric.X + pointBarycentric.Y < 0.5) {
+		return 0;
+	} else {
+		//assert pointBarycentric.Y + pointBarycentric.Y < 1 - else the point is outside the triangle
+		if (pointBarycentric.X > 0.5) {
+			return 1;
+		} else if (pointBarycentric.Y > 0.5) {
+			return 2;
+		} else {
+			//both are < 0.5.
+			return 3;
+		}
+	}
+
 }
 
+void jw::JWSphere::buildTetrahedronBarycentricMatrix(core::matrix4 & matrT,
+		const core::vector3df *r1, const core::vector3df *r2,
+		const core::vector3df *r3, const core::vector3df *r4)
+{
+	//See http://en.wikipedia.org/wiki/Barycentric_coordinate_system_(mathematics)#Barycentric_coordinates_on_tetrahedra
+	//T^(-1) . (r - r4) is equal to adding r4 to a 4th row in T before inversing, and then just multiplying T^(-1) . r
+	matrT[0] = r1->X - r4->X;
+	matrT[1] = r1->Y - r4->Y;
+	matrT[2] = r1->Z - r4->Z;
+	matrT[3] = 0.;
 
+	matrT[4] = r2->X - r4->X;
+	matrT[5] = r2->Y - r4->Y;
+	matrT[6] = r2->Z - r4->Z;
+	matrT[7] = 0.;
 
+	matrT[8] = r3->X - r4->X;
+	matrT[9] = r3->Y - r4->Y;
+	matrT[10] = r3->Z - r4->Z;
+	matrT[11] = 0.;
+
+	matrT[12] = r4->X;
+	matrT[13] = r4->Y;
+	matrT[14] = r4->Z;
+	matrT[15] = 1.;
+
+	matrT.makeInverse();
+}
+
+u32 jw::JWSphere::getTriangleUnderPoint(int level, const core::vector3df & point)
+{
+	u32 result = octahedronTriangleUnderPoint(point);
+
+	for (int l = 0; l < level; l++) {
+		u32 subtr = getSubtriangleUnderPoint(result, l, point);
+		result |= subtr << (2 * l + 3);
+	}
+	return result;
+}
 
 
 

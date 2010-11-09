@@ -12,9 +12,9 @@
 #include "AutoCleanHashMap.h"
 #include "JWTriangle.h"
 #include "IJWLogger.h"
+#include "matrix4.h"
 
 using namespace irr;
-
 
 //At what level triangles and vertexes are not deleted
 #define PERSISTENT_CACHED_LEVEL 7
@@ -52,36 +52,47 @@ class JWSphere
 {
 	AutoCleanHashMap<core::vector3df> m_mapVertices;
 	AutoCleanHashMap<JWTriangle> m_vmapTriangles[MAX_TRIANGLE_LEVELS];
-    IJWLogger *log;
+	IJWLogger *log;
 public:
-    JWSphere();
-    virtual ~JWSphere();
-    core::vector3df *getVertex(u32 key);
-    JWTriangle *getTriangle(u32 key, int level);
-    u32 getTriangleVertex(u32 triangle, int level, int i, bool preventGeneration = false);
-    void divideTriangle(u32 triangle, int level);
+	JWSphere();
+	virtual ~JWSphere();
+	core::vector3df *getVertex(u32 key);
+	JWTriangle *getTriangle(u32 key, int level);
+	u32 getTriangleVertex(u32 triangle, int level, int i,
+			bool preventGeneration = false);
+	void divideTriangle(u32 triangle, int level);
 
-    int getTilesRow(u32 startTriangle, int level, int left, int right, u32* result);
+	int getTilesRow(u32 startTriangle, int level, int left, int right,
+			u32* result);
 
-    /**
-     * Returns the triangles from a part of the sphere surface
-     * \param startTriangle Triangle inside the required area
-     * \param left, right, up, down How many tiles to each of the directions from the startTriangle are required
-     * \param result Pointer to receive the triangle IDs
-     * \return the number of triangles returned
-     */
-    int getTilesSquare(u32 startTriangle, int level, int left, int right, int up, int down, u32* result);
+	/**
+	 * Returns the triangles from a part of the sphere surface
+	 * \param startTriangle Triangle inside the required area
+	 * \param left, right, up, down How many tiles to each of the directions from the startTriangle are required
+	 * \param result Pointer to receive the triangle IDs
+	 * \return the number of triangles returned
+	 */
+	int getTilesSquare(u32 startTriangle, int level, int left, int right,
+			int up, int down, u32* result);
 
-    /**
-     * Returns a neighbor triangle of certain triangle at certain level.
-     * If the neighbor triangle is beyond a pole (happens only in case we go up or down),
-     * will also change the direction accordingly
-     */
-    u32 getNeighborTriangle(u32 triangle, int level, Direction& rwDirection);
+	/**
+	 * Returns a neighbor triangle of certain triangle at certain level.
+	 * If the neighbor triangle is beyond a pole (happens only in case we go up or down),
+	 * will also change the direction accordingly
+	 */
+	u32 getNeighborTriangle(u32 triangle, int level, Direction& rwDirection);
 
-    u32 octahedronTriangleFromPoint(const core::vector3df & point);
+	static void buildTetrahedronBarycentricMatrix(core::matrix4& matrix,
+			const core::vector3df* r1, const core::vector3df* r2,
+			const core::vector3df* r3, const core::vector3df* r4);
 
-    u32 getSubtriangleUnderPoint(u32 triangle, int level, const core::vector3df & point);
+	u32 octahedronTriangleUnderPoint(const core::vector3df & point);
+
+	u32 getSubtriangleUnderPoint(u32 triangle, int level,
+			const core::vector3df & point);
+
+	u32 getTriangleUnderPoint(int level,
+			const core::vector3df & point);
 };
 }
 #endif /* JWSPHERE_H_ */

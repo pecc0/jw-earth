@@ -43,7 +43,7 @@ enum
 
 IrrlichtDevice *g_Device;
 JWSceneNodeAnimatorCameraFPS* g_CameraAnimator;
-
+EarthVisualization *g_EarthVisualization;
 class MyEventReceiver: public IEventReceiver
 {
 public:
@@ -92,7 +92,7 @@ public:
 			if (event.UserEvent.UserData1 == ANIMATION_MOVE_EVENT)
 			{
 				ISceneNode* node = (ISceneNode*) event.UserEvent.UserData2;
-				node->getPosition();
+				g_EarthVisualization->setViewerPoint(node->getPosition());
 			}
 
 		}
@@ -188,8 +188,7 @@ int main()
 	 to drop it only *after* I have finished using it, regardless of what
 	 the reference count of the object is after creation.
 	 */
-	EarthVisualization *myNode = new EarthVisualization(
-			smgr->getRootSceneNode(), smgr, 666);
+	g_EarthVisualization = new EarthVisualization(smgr->getRootSceneNode(), smgr, 666);
 
 	/*
 	 To animate something in this boring scene consisting only of one
@@ -205,7 +204,7 @@ int main()
 
 	if (anim)
 	{
-		myNode->addAnimator(anim);
+		g_EarthVisualization->addAnimator(anim);
 
 		/*
 		 I'm done referring to anim, so must
@@ -223,8 +222,8 @@ int main()
 	 scene graph, which prevents the deletion until the graph is deleted or the
 	 custom scene node is removed from it.
 	 */
-	myNode->drop();
-	myNode = 0; // As I shouldn't refer to it again, ensure that I can't
+	g_EarthVisualization->drop();
+	//myNode = 0; // As I shouldn't refer to it again, ensure that I can't
 
 	/*
 	 Now draw everything and finish.
