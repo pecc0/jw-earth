@@ -499,8 +499,10 @@ void jw::JWSphere::buildTetrahedronBarycentricMatrix(core::matrix4 & matrT,
 	matrT.makeInverse();
 }
 
-u32 jw::JWSphere::getTriangleUnderPoint(int level, const core::vector3df & point)
+u32 jw::JWSphere::getTriangleUnderPoint(int level, const core::vector3df & inPoint)
 {
+	core::vector3df point(inPoint);
+	point.setLength(SPHERE_RADIUS);
 	u32 result = octahedronTriangleUnderPoint(point);
 
 	for (int l = 0; l < level; l++) {

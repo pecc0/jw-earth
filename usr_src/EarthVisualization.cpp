@@ -21,7 +21,7 @@ EarthVisualization::EarthVisualization(scene::ISceneNode* parent,
 	m_Material.Wireframe = true;
 	m_Material.Lighting = false;
 
-	m_vVerteces = jw::AutoCleanHashMap<video::S3DVertex>(1000, 1.1, 0.0);
+	m_vVerteces = jw::AutoCleanHashMap<video::S3DVertex>(10000, 1.1, 0.0);
 	m_vVerteces.init();
 
 	init();
@@ -49,7 +49,7 @@ EarthVisualization::EarthVisualization(scene::ISceneNode* parent,
 void EarthVisualization::init()
 {
 	m_vIndices = 0;
-	m_nLevel = 4;
+	m_nLevel = 6;
 	m_uTriangleUnderUs = 1;
 	setTriangleUnderUs(0);
 
@@ -112,7 +112,7 @@ void EarthVisualization::generateMesh()
 
 	g_TrCount = m_Sphere.getTilesSquare(0b000, m_nLevel, 16, 16, 8, 18,
 			g_TrianglesBuf);
-	if (g_TrCount > 1000)
+	if (g_TrCount > 3000)
 	{
 		return;
 	}
