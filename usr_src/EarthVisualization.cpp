@@ -49,7 +49,7 @@ EarthVisualization::EarthVisualization(scene::ISceneNode* parent,
 void EarthVisualization::init()
 {
 	m_vIndices = 0;
-	m_nLevel = 5;
+	m_nLevel = 7;
 	m_uTriangleUnderUs = 1;
 	setTriangleUnderUs(0);
 
@@ -110,7 +110,7 @@ void EarthVisualization::generateMesh()
 
 	clear();
 
-	g_TrCount = m_Sphere.getTilesSquare(0b11011111000, m_nLevel, 16, 36, 8, 18,
+	g_TrCount = m_Sphere.getTilesSquare(0b1001011000, m_nLevel, 16, 36, 8, 18,
 			g_TrianglesBuf);
 	if (g_TrCount > 3000)
 	{

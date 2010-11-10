@@ -422,6 +422,9 @@ u32 jw::JWSphere::octahedronTriangleUnderPoint(const core::vector3df & point)
 	return result;
 }
 
+f32 g_BorderFunc[14] =
+{ 0.605, 0.531, 0.5006, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5 };
+
 u32 jw::JWSphere::getSubtriangleUnderPoint(u32 triangle, int level,
 		const core::vector3df & point)
 {
@@ -456,28 +459,29 @@ u32 jw::JWSphere::getSubtriangleUnderPoint(u32 triangle, int level,
 
 	if (level == 0)
 	{
-		log->info("(%f, %f, %f)", pointBarycentric.X, pointBarycentric.Y,
-				pointBarycentric.X, pointBarycentric.Z);
+		//log->info("(%f, %f, %f)", pointBarycentric.X, pointBarycentric.Y,
+		//		pointBarycentric.X, pointBarycentric.Z);
 	}
 
-	f32 tresshold = 0.5;
+	//Border between the triangles. In flat case this value should be 0.5, but due to
+	//we are in a sphere, we have to correct the value. The bigger is this value,
+	//the bigger priority we give to the center triangle before the cornet ones.
+	//Empirically, I found that at level 0 the border should be 0.605
+	//Then, for each next level we should divide the correction of 0.105 by 4*Pi
+	f32 border = g_BorderFunc[level];
 
-	if (level == 0) {
-		tresshold = 0.55;
-	}
-
-	if (pointBarycentric.X + pointBarycentric.Y < 1. - tresshold)
+	if (pointBarycentric.X + pointBarycentric.Y < 1. - border)
 	{
 		return 0;
 	}
 	else
 	{
 		//assert pointBarycentric.Y + pointBarycentric.Y < 1 - else the point is outside the triangle
-		if (pointBarycentric.X > tresshold)
+		if (pointBarycentric.X > border)
 		{
 			return 1;
 		}
-		else if (pointBarycentric.Y > tresshold)
+		else if (pointBarycentric.Y > border)
 		{
 			return 2;
 		}
