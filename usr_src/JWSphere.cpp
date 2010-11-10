@@ -460,24 +460,30 @@ u32 jw::JWSphere::getSubtriangleUnderPoint(u32 triangle, int level,
 				pointBarycentric.X, pointBarycentric.Z);
 	}
 
-	if (pointBarycentric.X + pointBarycentric.Y < 0.5)
+	f32 tresshold = 0.5;
+
+	if (level == 0) {
+		tresshold = 0.55;
+	}
+
+	if (pointBarycentric.X + pointBarycentric.Y < 1. - tresshold)
 	{
 		return 0;
 	}
 	else
 	{
 		//assert pointBarycentric.Y + pointBarycentric.Y < 1 - else the point is outside the triangle
-		if (pointBarycentric.X > 0.5)
+		if (pointBarycentric.X > tresshold)
 		{
 			return 1;
 		}
-		else if (pointBarycentric.Y > 0.5)
+		else if (pointBarycentric.Y > tresshold)
 		{
 			return 2;
 		}
 		else
 		{
-			//both are < 0.5.
+			//both are < tresshold.
 			return 3;
 		}
 	}
