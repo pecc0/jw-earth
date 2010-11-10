@@ -34,15 +34,14 @@ ConsoleLogger::ConsoleLogger(const string& name) :
 
 ConsoleLogger::~ConsoleLogger()
 {
-	// TODO Auto-generated destructor stub
 }
 
 char g_buffer[512] =
 { 0 };
 void jw::log::ConsoleLogger::print(const string& str)
 {
-	//printf("[%s]: %s\n", m_strName.c_str(), str.c_str());
-	//fflush(stdout);
+	printf("[%s]: %s\n", m_strName.c_str(), str.c_str());
+	fflush(stdout);
 }
 
 void ConsoleLogger::trace(const char *pattern, ...)

@@ -134,7 +134,7 @@ int main()
 	IGUIEnvironment* env = g_Device->getGUIEnvironment();
 
 	IGUISkin* skin = env->getSkin();
-	IGUIFont* font = env->getFont("../../media/fonthaettenschweiler.bmp");
+	IGUIFont* font = env->getFont("media/fonthaettenschweiler.bmp");
 	if (font)
 		skin->setFont(font);
 
@@ -169,7 +169,7 @@ int main()
 
 	camera->setFarValue(20000.f);
 	camera->setPosition(core::vector3df(0, 0, -200));
-	camera->setTarget(core::vector3df(0, 30, 0));
+	camera->setTarget(core::vector3df(0, 0, 0));
 
 	//camera->setFarValue(20000.f);
 
@@ -190,7 +190,8 @@ int main()
 	 to drop it only *after* I have finished using it, regardless of what
 	 the reference count of the object is after creation.
 	 */
-	g_EarthVisualization = new EarthVisualization(smgr->getRootSceneNode(), smgr, 666);
+	g_EarthVisualization = new EarthVisualization(smgr->getRootSceneNode(),
+			smgr, 666);
 
 	/*
 	 To animate something in this boring scene consisting only of one
@@ -227,6 +228,17 @@ int main()
 	g_EarthVisualization->drop();
 	//myNode = 0; // As I shouldn't refer to it again, ensure that I can't
 
+	scene::ISceneNode* bill = smgr->addBillboardSceneNode(0, core::dimension2d<
+			f32>(60, 60), core::vector3df(0, 0, 0), 113);
+
+	bill->setMaterialFlag(video::EMF_LIGHTING, false);
+	bill->setMaterialFlag(video::EMF_ZWRITE_ENABLE, false);
+	bill->setMaterialType(video::EMT_TRANSPARENT_ADD_COLOR);
+	bill->setMaterialTexture(0, driver->getTexture(
+			"media/particlered.bmp"));
+
+	//bill->drop();
+
 	/*
 	 Now draw everything and finish.
 	 */
@@ -243,7 +255,8 @@ int main()
 		if (++frames == 100)
 		{
 			core::stringw str = L"Irrlicht Engine [";
-			wchar_t val[33]= {0};
+			wchar_t val[33] =
+			{ 0 };
 			_itow(g_EarthVisualization->getUTriangleUnderUs(), val, 2);
 			str += driver->getName();
 			str += L"] FPS: ";

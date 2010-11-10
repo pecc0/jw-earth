@@ -436,12 +436,12 @@ u32 jw::JWSphere::getSubtriangleUnderPoint(u32 triangle, int level,
 
 	core::vector3df bufR3;
 	{
-		//I'll calculate r3 so that r3 - r4 is orthogonal to the triangle surface, and |r3 - r4| = 1
-		//This way the third Barycentric coordinate will give exactly the distance from the point to
-		//the triangle surface in current coordinate system (not that we'll need that distance)
+		//I'll calculate r3 so that r3 - r4 is orthogonal to the triangle surface.
 		core::vector3df r1r4 = (*r1) - (*r4);
 		core::vector3df r2r4 = (*r2) - (*r4);
-		bufR3 = r1r4.crossProduct(r2r4).normalize();
+		bufR3 = r1r4.crossProduct(r2r4);
+		//bufR3.normalize();
+		//bufR3.setLength(r2r4.getLength());
 		bufR3 += (*r4);
 	}
 	r3 = &bufR3;
@@ -454,15 +454,29 @@ u32 jw::JWSphere::getSubtriangleUnderPoint(u32 triangle, int level,
 
 	matrT.transformVect(pointBarycentric, point);
 
-	if (pointBarycentric.X + pointBarycentric.Y < 0.5) {
+	if (level == 0)
+	{
+		log->info("(%f, %f, %f)", pointBarycentric.X, pointBarycentric.Y,
+				pointBarycentric.X, pointBarycentric.Z);
+	}
+
+	if (pointBarycentric.X + pointBarycentric.Y < 0.5)
+	{
 		return 0;
-	} else {
+	}
+	else
+	{
 		//assert pointBarycentric.Y + pointBarycentric.Y < 1 - else the point is outside the triangle
-		if (pointBarycentric.X > 0.5) {
+		if (pointBarycentric.X > 0.5)
+		{
 			return 1;
-		} else if (pointBarycentric.Y > 0.5) {
+		}
+		else if (pointBarycentric.Y > 0.5)
+		{
 			return 2;
-		} else {
+		}
+		else
+		{
 			//both are < 0.5.
 			return 3;
 		}
@@ -499,18 +513,18 @@ void jw::JWSphere::buildTetrahedronBarycentricMatrix(core::matrix4 & matrT,
 	matrT.makeInverse();
 }
 
-u32 jw::JWSphere::getTriangleUnderPoint(int level, const core::vector3df & inPoint)
+u32 jw::JWSphere::getTriangleUnderPoint(int level,
+		const core::vector3df & inPoint)
 {
 	core::vector3df point(inPoint);
 	point.setLength(SPHERE_RADIUS);
 	u32 result = octahedronTriangleUnderPoint(point);
 
-	for (int l = 0; l < level; l++) {
+	for (int l = 0; l < level; l++)
+	{
 		u32 subtr = getSubtriangleUnderPoint(result, l, point);
 		result |= subtr << (2 * l + 3);
 	}
 	return result;
 }
-
-
 
