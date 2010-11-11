@@ -82,6 +82,8 @@ public:
 	 */
 	u32 getNeighborTriangle(u32 triangle, int level, Direction& rwDirection);
 
+
+
 	static void buildTetrahedronBarycentricMatrix(core::matrix4& matrix,
 			const core::vector3df* r1, const core::vector3df* r2,
 			const core::vector3df* r3, const core::vector3df* r4);

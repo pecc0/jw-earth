@@ -286,6 +286,8 @@ void jw::JWSphere::divideTriangle(u32 triangle, int level)
 
 }
 
+//--------------------- rectangular part of the sphere ---------------------
+
 int jw::JWSphere::getTilesRow(u32 startTriangle, int level, int left,
 		int right, u32 *result)
 {
@@ -408,6 +410,11 @@ u32 jw::JWSphere::getNeighborTriangle(u32 triangle, int level,
 	}
 }
 
+//--------------------- end of rectangular part of the sphere ---------------------
+
+
+
+//--------------------- Triangle under point ---------------------
 u32 jw::JWSphere::octahedronTriangleUnderPoint(const core::vector3df & point)
 {
 	//TODO translate the point if the sphere center is not at (0,0,0)
@@ -545,3 +552,4 @@ u32 jw::JWSphere::getTriangleUnderPoint(int level,
 	return result;
 }
 
+//--------------------- end of Triangle under point ---------------------

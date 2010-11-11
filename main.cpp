@@ -171,6 +171,7 @@ int main()
 	g_CameraAnimator->setKeyMap(keyMap, 6);
 
 	camera->setFarValue(30000.f); //30 000 km
+	//camera->setUpVector(core::vector3df(0,0,1));
 	camera->setPosition(core::vector3df(0, 0, -SPHERE_RADIUS - 200.));
 	camera->setTarget(core::vector3df(0, 0, 0));
 
