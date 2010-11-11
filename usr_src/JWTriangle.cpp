@@ -36,7 +36,7 @@ JWTriangle::~JWTriangle()
 
 u32 JWTriangle::getNeighbour(int i)
 {
-	return this->m_vNeighbours[i % 3] & 0x7FFFFFFF;
+	return this->m_vNeighbours[i % 3]; // & 0x7FFFFFFF
 }
 
 bool JWTriangle::isNeighbourGenerated(int i)

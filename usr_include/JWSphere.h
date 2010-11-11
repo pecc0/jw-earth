@@ -8,11 +8,14 @@
 #ifndef JWSPHERE_H_
 #define JWSPHERE_H_
 
+#include <queue>
+#include <set>
 #include <irrlicht.h>
 #include "AutoCleanHashMap.h"
 #include "JWTriangle.h"
 #include "IJWLogger.h"
 #include "matrix4.h"
+
 
 using namespace irr;
 
@@ -50,10 +53,14 @@ using namespace log;
 
 class JWSphere
 {
+
+
 	AutoCleanHashMap<core::vector3df> m_mapVertices;
 	AutoCleanHashMap<JWTriangle> m_vmapTriangles[MAX_TRIANGLE_LEVELS + 1];
 	IJWLogger *log;
 public:
+	class BFSIterator;
+
 	JWSphere();
 	virtual ~JWSphere();
 	core::vector3df *getVertex(u32 key);
@@ -82,7 +89,7 @@ public:
 	 */
 	u32 getNeighborTriangle(u32 triangle, int level, Direction& rwDirection);
 
-
+	BFSIterator* bfs(u32 startTr, int startLevel);
 
 	static void buildTetrahedronBarycentricMatrix(core::matrix4& matrix,
 			const core::vector3df* r1, const core::vector3df* r2,
@@ -93,8 +100,28 @@ public:
 	u32 getSubtriangleUnderPoint(u32 triangle, int level,
 			const core::vector3df & point);
 
-	u32 getTriangleUnderPoint(int level,
-			const core::vector3df & point);
+	u32 getTriangleUnderPoint(int level, const core::vector3df & point);
+
+	class BFSIterator : virtual public IReferenceCounted
+	{
+		JWSphere* m_sphere;
+		queue<u32> m_trQueue;
+		set<u32> m_trUsed;
+		int m_level;
+	public:
+		BFSIterator(JWSphere* sphere, u32 start, int level);
+		virtual ~BFSIterator() {
+
+		}
+	    int getLevel() const;
+	    void setLevel(int m_level);
+	    bool next(u32* result);
+	    void accept(u32 triangle);
+	};
 };
+
 }
+
+
+
 #endif /* JWSPHERE_H_ */

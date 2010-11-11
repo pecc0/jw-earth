@@ -105,48 +105,81 @@ video::SMaterial& EarthVisualization::getMaterial(u32 i)
 	return m_Material;
 }
 
+void EarthVisualization::addTriangleToMesh(u32 triangle)
+{
+	for (int j = 2; j >= 0; --j)
+	{
+		u32 vertexId = m_Sphere.getTriangleVertex(triangle, m_nLevel, j, false);
+
+		int hash = m_mapVerteces.hash(vertexId);
+		if (m_mapVerteces.getPtrKeys()[hash] == EMPTY_KEY)
+		{
+			core::vector3df* ptrVertPos = m_Sphere.getVertex(vertexId);
+			video::S3DVertex vert(*ptrVertPos, *ptrVertPos, video::SColor(255,
+					0, 255, 0), core::vector2d<f32>(0, 0));
+			vert.Normal.normalize();
+			paintVertex(vertexId, &vert);
+			m_mapVerteces.put(vertexId, &vert);
+		}
+		else
+		{
+			video::S3DVertex* v = m_mapVerteces.getPtrPool() + hash;
+			paintVertex(vertexId, v);
+		}
+		m_vIndices[m_nCurrentIndex++] = hash;
+	}
+}
+
 void EarthVisualization::generateMesh()
 {
 
 	clear();
 
-	m_nTrCount = m_Sphere.getTilesSquare(JWTriangle::getParentTriangle(
-			0b01010101010101010101010101010000, m_nLevel + 1), m_nLevel, 16,
-			36, 8, 18, g_TrianglesBuf);
-	if (m_nTrCount > 3000)
+	/*m_nTrCount = m_Sphere.getTilesSquare(JWTriangle::getParentTriangle(
+	 0b01010101010101010101010101010000, m_nLevel + 1), m_nLevel, 16,
+	 36, 8, 18, g_TrianglesBuf);
+	 if (m_nTrCount > 3000)
+	 {
+	 return;
+	 }
+	 */
+	m_nTrCount = 0;
+
+	m_vIndices = new u32[2000 * 3];
+
+	m_nCurrentIndex = 0;
+	/*
+	 for (int i = 0; i < m_nTrCount; i++)
+	 {
+	 addTriangleToMesh(g_TrianglesBuf[i]);
+	 }
+	 */
+	jw::JWSphere::BFSIterator* i = m_Sphere.bfs(m_uTriangleUnderUs, m_nLevel);
+	u32 triangle;
+	core::vector3df startPt = m_vertViewerPoint;
+	startPt.setLength(SPHERE_RADIUS);
+
+	while (i->next(&triangle))
 	{
-		return;
-	}
-
-	m_vIndices = new u32[m_nTrCount * 3];
-
-	int k = 0;
-
-	for (int i = 0; i < m_nTrCount; i++)
-	{
-		for (int j = 2; j >= 0; --j)
+		if (m_nTrCount < 2000)
 		{
-			u32 vertexId = m_Sphere.getTriangleVertex(g_TrianglesBuf[i],
-					m_nLevel, j, false);
-
-			int hash = m_mapVerteces.hash(vertexId);
-			if (m_mapVerteces.getPtrKeys()[hash] == EMPTY_KEY)
+			u32 vertexId = m_Sphere.getTriangleVertex(triangle, m_nLevel, 0,
+					false);
+			core::vector3df* ptrVertPos = m_Sphere.getVertex(vertexId);
+			if (ptrVertPos->getDistanceFrom(startPt) < 200000 >> m_nLevel)
 			{
-				core::vector3df* ptrVertPos = m_Sphere.getVertex(vertexId);
-				video::S3DVertex vert(*ptrVertPos, *ptrVertPos, video::SColor(
-						255, 0, 255, 0), core::vector2d<f32>(0, 0));
-				vert.Normal.normalize();
-				paintVertex(vertexId, &vert);
-				m_mapVerteces.put(vertexId, &vert);
+				addTriangleToMesh(triangle);
+				i->accept(triangle);
+				m_nTrCount++;
 			}
-			else
-			{
-				video::S3DVertex* v = m_mapVerteces.getPtrPool() + hash;
-				paintVertex(vertexId, v);
-			}
-			m_vIndices[k++] = hash;
+		}
+		else
+		{
+			break;
 		}
 	}
+
+	i->drop();
 }
 
 const core::vector3df& EarthVisualization::getViewerPoint() const

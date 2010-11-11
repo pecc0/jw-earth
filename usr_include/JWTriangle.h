@@ -74,6 +74,7 @@ public:
 	 * Returns whether the ID of neighbour we have is a triangle from same level,
 	 * or from one level above
 	 *  \param i internal index of the neighbour - 0-2
+	 *  @deprecated Not used
 	 */
 	bool isNeighbourGenerated(int i);
 

@@ -30,6 +30,7 @@ class EarthVisualization: public irr::scene::ISceneNode
 	jw::AutoCleanHashMap<video::S3DVertex> m_mapVerteces;
 
 	int m_nTrCount;
+	int m_nCurrentIndex;
 	u32 * m_vIndices;
 
 	core::aabbox3d<f32> m_Box;
@@ -45,6 +46,7 @@ class EarthVisualization: public irr::scene::ISceneNode
 
     void init();
     void clear();
+    void addTriangleToMesh(u32 triangle);
 public:
     EarthVisualization();
     EarthVisualization(scene::ISceneNode *parent, scene::ISceneManager *mgr, s32 id);

@@ -412,7 +412,10 @@ u32 jw::JWSphere::getNeighborTriangle(u32 triangle, int level,
 
 //--------------------- end of rectangular part of the sphere ---------------------
 
-
+jw::JWSphere::BFSIterator *jw::JWSphere::bfs(u32 startTr, int startLevel)
+{
+	return new BFSIterator(this, startTr, startLevel);
+}
 
 //--------------------- Triangle under point ---------------------
 u32 jw::JWSphere::octahedronTriangleUnderPoint(const core::vector3df & point)
