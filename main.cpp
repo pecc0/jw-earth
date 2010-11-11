@@ -146,9 +146,9 @@ int main()
 			+ 25, GUI_X + 200, GUI_Y + 45), 0, GUI_ID_TRANSPARENCY_SCROLL_BAR);
 
 	//max speed -> 1000 * 1000 / 100000 = 10 km/frame
-	//min speed -> 1 / 100000 = 1cm / frame
+	//min speed -> 10 * 10 / 100000 = 1m / frame
 	scrollbar->setMax(1000);
-	scrollbar->setMin(1);
+	scrollbar->setMin(10);
 
 	scrollbar->setPos(255);
 

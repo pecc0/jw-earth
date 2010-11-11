@@ -49,7 +49,7 @@ EarthVisualization::EarthVisualization(scene::ISceneNode* parent,
 void EarthVisualization::init()
 {
 	m_vIndices = 0;
-	m_nLevel = 13;
+	m_nLevel = 14;
 	m_uTriangleUnderUs = 1;
 	setTriangleUnderUs(JWTriangle::getParentTriangle(
 			0b01010101010101010101010101010000, m_nLevel + 1));

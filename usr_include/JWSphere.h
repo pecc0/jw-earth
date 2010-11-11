@@ -51,7 +51,7 @@ using namespace log;
 class JWSphere
 {
 	AutoCleanHashMap<core::vector3df> m_mapVertices;
-	AutoCleanHashMap<JWTriangle> m_vmapTriangles[MAX_TRIANGLE_LEVELS];
+	AutoCleanHashMap<JWTriangle> m_vmapTriangles[MAX_TRIANGLE_LEVELS + 1];
 	IJWLogger *log;
 public:
 	JWSphere();
