@@ -49,9 +49,10 @@ EarthVisualization::EarthVisualization(scene::ISceneNode* parent,
 void EarthVisualization::init()
 {
 	m_vIndices = 0;
-	m_nLevel = 8;
+	m_nLevel = 13;
 	m_uTriangleUnderUs = 1;
-	setTriangleUnderUs(0);
+	setTriangleUnderUs(JWTriangle::getParentTriangle(
+			0b01010101010101010101010101010000, m_nLevel + 1));
 
 	//generateMesh();
 }
@@ -109,9 +110,9 @@ void EarthVisualization::generateMesh()
 
 	clear();
 
-	m_nTrCount = m_Sphere.getTilesSquare(0b1010101010101010101010101010000
-			& (0xffffffff >> (MAX_TRIANGLE_LEVELS * 2 - m_nLevel * 2 + 1)),
-			m_nLevel, 16, 36, 8, 18, g_TrianglesBuf);
+	m_nTrCount = m_Sphere.getTilesSquare(JWTriangle::getParentTriangle(
+			0b01010101010101010101010101010000, m_nLevel + 1), m_nLevel, 16,
+			36, 8, 18, g_TrianglesBuf);
 	if (m_nTrCount > 3000)
 	{
 		return;

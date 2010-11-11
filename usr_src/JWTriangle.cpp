@@ -36,7 +36,7 @@ JWTriangle::~JWTriangle()
 
 u32 JWTriangle::getNeighbour(int i)
 {
-	return this->m_vNeighbours[i % 3] & 0xEFFFFFFF;
+	return this->m_vNeighbours[i % 3] & 0x7FFFFFFF;
 }
 
 bool JWTriangle::isNeighbourGenerated(int i)
@@ -54,7 +54,7 @@ int JWTriangle::getNeighborInternalIndex(u32 trNeighbor)
 			return result;
 		}
 	}
-	return -1;
+	return -13;
 }
 
 bool JWTriangle::isUpside(u32 trIndex, int level)
