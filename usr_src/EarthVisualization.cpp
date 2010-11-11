@@ -21,8 +21,8 @@ EarthVisualization::EarthVisualization(scene::ISceneNode* parent,
 	m_Material.Wireframe = true;
 	m_Material.Lighting = false;
 
-	m_vVerteces = jw::AutoCleanHashMap<video::S3DVertex>(10000, 1.1, 0.0);
-	m_vVerteces.init();
+	m_mapVerteces = jw::AutoCleanHashMap<video::S3DVertex>(10000, 1.1, 0.0);
+	m_mapVerteces.init();
 
 	init();
 
@@ -74,7 +74,7 @@ void EarthVisualization::OnRegisterSceneNode()
 	ISceneNode::OnRegisterSceneNode();
 }
 
-int g_TrCount;
+
 u32 g_TrianglesBuf[3000];
 
 void EarthVisualization::render()
@@ -84,8 +84,8 @@ void EarthVisualization::render()
 	driver->setMaterial(m_Material);
 	driver->setTransform(video::ETS_WORLD, AbsoluteTransformation);
 
-	driver->drawVertexPrimitiveList(m_vVerteces.getPtrPool(),
-			m_vVerteces.capacity(), m_vIndices, g_TrCount, video::EVT_STANDARD,
+	driver->drawVertexPrimitiveList(m_mapVerteces.getPtrPool(),
+			m_mapVerteces.capacity(), m_vIndices, m_nTrCount, video::EVT_STANDARD,
 			scene::EPT_TRIANGLES, video::EIT_32BIT);
 
 }
@@ -110,37 +110,37 @@ void EarthVisualization::generateMesh()
 
 	clear();
 
-	g_TrCount = m_Sphere.getTilesSquare(0b1001011000, m_nLevel, 16, 36, 8, 18,
+	m_nTrCount = m_Sphere.getTilesSquare(0b1001011000, m_nLevel, 16, 36, 8, 18,
 			g_TrianglesBuf);
-	if (g_TrCount > 3000)
+	if (m_nTrCount > 3000)
 	{
 		return;
 	}
 
-	m_vIndices = new u32[g_TrCount * 3];
+	m_vIndices = new u32[m_nTrCount * 3];
 
 	int k = 0;
 
-	for (int i = 0; i < g_TrCount; i++)
+	for (int i = 0; i < m_nTrCount; i++)
 	{
 		for (int j = 2; j >= 0; --j)
 		{
 			u32 vertexId = m_Sphere.getTriangleVertex(g_TrianglesBuf[i],
 					m_nLevel, j, false);
 
-			int hash = m_vVerteces.hash(vertexId);
-			if (m_vVerteces.getPtrKeys()[hash] == EMPTY_KEY)
+			int hash = m_mapVerteces.hash(vertexId);
+			if (m_mapVerteces.getPtrKeys()[hash] == EMPTY_KEY)
 			{
 				core::vector3df* ptrVertPos = m_Sphere.getVertex(vertexId);
 				video::S3DVertex vert(*ptrVertPos, *ptrVertPos, video::SColor(
 						255, 0, 255, 0), core::vector2d<f32>(0, 0));
 				vert.Normal.normalize();
 				paintVertex(vertexId, &vert);
-				m_vVerteces.put(vertexId, &vert);
+				m_mapVerteces.put(vertexId, &vert);
 			}
 			else
 			{
-				video::S3DVertex* v = m_vVerteces.getPtrPool() + hash;
+				video::S3DVertex* v = m_mapVerteces.getPtrPool() + hash;
 				paintVertex(vertexId, v);
 			}
 			m_vIndices[k++] = hash;

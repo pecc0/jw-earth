@@ -27,8 +27,9 @@ class EarthVisualization: public irr::scene::ISceneNode
 {
 	jw::JWSphere m_Sphere;
 
-	jw::AutoCleanHashMap<video::S3DVertex> m_vVerteces;
+	jw::AutoCleanHashMap<video::S3DVertex> m_mapVerteces;
 
+	int m_nTrCount;
 	u32 * m_vIndices;
 
 	core::aabbox3d<f32> m_Box;

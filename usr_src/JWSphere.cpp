@@ -465,7 +465,7 @@ u32 jw::JWSphere::getSubtriangleUnderPoint(u32 triangle, int level,
 
 	//Border between the triangles. In flat case this value should be 0.5, but due to
 	//we are in a sphere, we have to correct the value. The bigger is this value,
-	//the bigger priority we give to the center triangle before the cornet ones.
+	//the bigger priority we give to the center triangle before the corner ones.
 	//Empirically, I found that at level 0 the border should be 0.605
 	//Then, for each next level we should divide the correction of 0.105 by 4*Pi
 	f32 border = g_BorderFunc[level];
