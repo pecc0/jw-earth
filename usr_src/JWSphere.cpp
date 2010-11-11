@@ -44,9 +44,15 @@ jw::JWSphere::JWSphere() :
 	m_vmapTriangles[6] = AutoCleanHashMap<JWTriangle> (8 << 12, 2.0);
 	//8 << 14 = 8 << (PERSISTENT_CACHED_LEVEL * 2)
 	m_vmapTriangles[7] = AutoCleanHashMap<JWTriangle> (8 << 14, 2.0);
+	m_vmapTriangles[8] = AutoCleanHashMap<JWTriangle> (150008);
+	m_vmapTriangles[9] = AutoCleanHashMap<JWTriangle> (150009);
+	m_vmapTriangles[10] = AutoCleanHashMap<JWTriangle> (150010);
+	m_vmapTriangles[11] = AutoCleanHashMap<JWTriangle> (150011);
+	m_vmapTriangles[12] = AutoCleanHashMap<JWTriangle> (150012);
+	m_vmapTriangles[13] = AutoCleanHashMap<JWTriangle> (150013);
 	//End of Triangles which will not be deleted
 
-	for (int i = 0; i < 8; i++)
+	for (int i = 0; i < MAX_TRIANGLE_LEVELS; i++)
 	{
 		m_vmapTriangles[i].init();
 	}

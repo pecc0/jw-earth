@@ -113,7 +113,9 @@ public:
 			KEY keyInMap = m_ptrKeys[result];
 			if (keyInMap == EMPTY_KEY || keyInMap == key)
 			{
-				//log->debug("hashing met %d collisions", iterations);
+				//if (m_nCapacity == 10000) {
+					//log->debug("hashing met %d collisions. m_nCapacity=%d; key=%d ", iterations, m_nCapacity, key);
+				//}
 				return result;
 			}
 			else
@@ -176,6 +178,7 @@ public:
 
 	void deleteLast(int num)
 	{
+		log->info("Delete last %d. m_nCapacity=%d", num, m_nCapacity);
 		Iterator i = begin();
 		i--;
 		while (num > 0)

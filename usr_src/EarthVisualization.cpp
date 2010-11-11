@@ -21,7 +21,7 @@ EarthVisualization::EarthVisualization(scene::ISceneNode* parent,
 	m_Material.Wireframe = true;
 	m_Material.Lighting = false;
 
-	m_mapVerteces = jw::AutoCleanHashMap<video::S3DVertex>(10000, 1.1, 0.0);
+	m_mapVerteces = jw::AutoCleanHashMap<video::S3DVertex>(10000);
 	m_mapVerteces.init();
 
 	init();
@@ -49,7 +49,7 @@ EarthVisualization::EarthVisualization(scene::ISceneNode* parent,
 void EarthVisualization::init()
 {
 	m_vIndices = 0;
-	m_nLevel = 7;
+	m_nLevel = 8;
 	m_uTriangleUnderUs = 1;
 	setTriangleUnderUs(0);
 
@@ -74,7 +74,6 @@ void EarthVisualization::OnRegisterSceneNode()
 	ISceneNode::OnRegisterSceneNode();
 }
 
-
 u32 g_TrianglesBuf[3000];
 
 void EarthVisualization::render()
@@ -85,8 +84,8 @@ void EarthVisualization::render()
 	driver->setTransform(video::ETS_WORLD, AbsoluteTransformation);
 
 	driver->drawVertexPrimitiveList(m_mapVerteces.getPtrPool(),
-			m_mapVerteces.capacity(), m_vIndices, m_nTrCount, video::EVT_STANDARD,
-			scene::EPT_TRIANGLES, video::EIT_32BIT);
+			m_mapVerteces.capacity(), m_vIndices, m_nTrCount,
+			video::EVT_STANDARD, scene::EPT_TRIANGLES, video::EIT_32BIT);
 
 }
 
@@ -110,8 +109,9 @@ void EarthVisualization::generateMesh()
 
 	clear();
 
-	m_nTrCount = m_Sphere.getTilesSquare(0b1001011000, m_nLevel, 16, 36, 8, 18,
-			g_TrianglesBuf);
+	m_nTrCount = m_Sphere.getTilesSquare(0b1010101010101010101010101010000
+			& (0xffffffff >> (MAX_TRIANGLE_LEVELS * 2 - m_nLevel * 2 + 1)),
+			m_nLevel, 16, 36, 8, 18, g_TrianglesBuf);
 	if (m_nTrCount > 3000)
 	{
 		return;

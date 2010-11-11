@@ -81,7 +81,7 @@ public:
 				{
 					const s32 pos =
 							((IGUIScrollBar*) event.GUIEvent.Caller)->getPos();
-					g_CameraAnimator->setMoveSpeed(pos / 10000.0);
+					g_CameraAnimator->setMoveSpeed(pos * pos / 100000.0);
 				}
 				break;
 			default:
@@ -144,7 +144,10 @@ int main()
 			GUI_X + 200, GUI_Y + 20), true);
 	IGUIScrollBar* scrollbar = env->addScrollBar(true, rect<s32> (GUI_X, GUI_Y
 			+ 25, GUI_X + 200, GUI_Y + 45), 0, GUI_ID_TRANSPARENCY_SCROLL_BAR);
-	scrollbar->setMax(500);
+
+	//max speed -> 1000 * 1000 / 100000 = 10 km/frame
+	//min speed -> 1 / 100000 = 1cm / frame
+	scrollbar->setMax(1000);
 	scrollbar->setMin(1);
 
 	scrollbar->setPos(255);
@@ -167,8 +170,8 @@ int main()
 	{ EKA_CROUCH, KEY_LSHIFT } };
 	g_CameraAnimator->setKeyMap(keyMap, 6);
 
-	camera->setFarValue(20000.f);
-	camera->setPosition(core::vector3df(0, 0, -200));
+	camera->setFarValue(30000.f); //30 000 km
+	camera->setPosition(core::vector3df(0, 0, -SPHERE_RADIUS - 200.));
 	camera->setTarget(core::vector3df(0, 0, 0));
 
 	//camera->setFarValue(20000.f);
@@ -229,7 +232,8 @@ int main()
 	//myNode = 0; // As I shouldn't refer to it again, ensure that I can't
 
 	scene::ISceneNode* bill = smgr->addBillboardSceneNode(0, core::dimension2d<
-			f32>(60, 60), core::vector3df(0, 0, 0), 113);
+			f32>(600, 600), core::vector3df(0, 0, 0), 113);
+	//600x600 km billboard
 
 	bill->setMaterialFlag(video::EMF_LIGHTING, false);
 	bill->setMaterialFlag(video::EMF_ZWRITE_ENABLE, false);
