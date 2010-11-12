@@ -456,12 +456,14 @@ u32 jw::JWSphere::getSubtriangleUnderPoint(u32 triangle, int level,
 
 	core::vector3df bufR3;
 	{
-		//I'll calculate r3 so that r3 - r4 is orthogonal to the triangle surface.
+		//I'll calculate r3 so that r3 - r4 is orthogonal to the triangle surface, and |r3-r4| = radius.
+		//This way in the Z berycentric coordinate I receive the distance from the point to the triangle.
+		//If the point is on the sphere, the distance to the triangle will be used to correct the border value
 		core::vector3df r1r4 = (*r1) - (*r4);
 		core::vector3df r2r4 = (*r2) - (*r4);
-		bufR3 = r1r4.crossProduct(r2r4);
+		bufR3 = r2r4.crossProduct(r1r4);
 		//bufR3.normalize();
-		//bufR3.setLength(r2r4.getLength());
+		bufR3.setLength(m_fRadius);
 		bufR3 += (*r4);
 	}
 	r3 = &bufR3;
@@ -474,18 +476,18 @@ u32 jw::JWSphere::getSubtriangleUnderPoint(u32 triangle, int level,
 
 	matrT.transformVect(pointBarycentric, point);
 
-	if (level == 0)
-	{
-		//log->info("(%f, %f, %f)", pointBarycentric.X, pointBarycentric.Y,
-		//		pointBarycentric.X, pointBarycentric.Z);
-	}
+	//pointBarycentric.Z = pointBarycentric.Z / m_fRadius;
 
+	f32 correction = pointBarycentric.Z * 0.576689 / (2 << level);
+
+	if (level == 0) {
+		//log->info("cor=%f", correction);
+		log->info("(%f, %f, %f. c=%f r=%f)", pointBarycentric.X, pointBarycentric.Y,
+						pointBarycentric.Z, correction, point.getLength());
+	}
 	//Border between the triangles. In flat case this value should be 0.5, but due to
-	//we are in a sphere, we have to correct the value. The bigger is this value,
-	//the bigger priority we give to the center triangle before the corner ones.
-	//Empirically, I found that at level 0 the border should be 0.605
-	//Then, for each next level we should divide the correction of 0.105 by 4*Pi
-	f32 border = g_BorderFunc[level];
+	//we are in a sphere, we have to correct the value.
+	f32 border = 0.5 + correction;
 
 	if (pointBarycentric.X + pointBarycentric.Y < 1. - border)
 	{

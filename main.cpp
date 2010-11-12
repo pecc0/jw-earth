@@ -190,7 +190,7 @@ int main()
 	{ EKA_CROUCH, KEY_LSHIFT } };
 	g_CameraAnimator->setKeyMap(keyMap, 6);
 
-	core::vector3df earthCenter(3000, 3000, 0);
+	core::vector3df earthCenter(0, 0, 0);
 
 	camera->setFarValue(50000.f); //50 000 km
 	//camera->setUpVector(core::vector3df(0,0,1));
