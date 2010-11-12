@@ -8,8 +8,10 @@
 #include "EarthVisualization.h"
 
 EarthVisualization::EarthVisualization(scene::ISceneNode* parent,
-		scene::ISceneManager* mgr, s32 id, const core::vector3df& center, f32 radius) :
-		 scene::ISceneNode(parent, mgr, id), m_Sphere(radius), m_vrtCenter(center), m_fRadius(radius)
+		scene::ISceneManager* mgr, s32 id, int level,
+		const core::vector3df& center, f32 radius) :
+	scene::ISceneNode(parent, mgr, id), m_Sphere(radius), m_nLevel(level),
+			m_vrtCenter(center), m_fRadius(radius)
 {
 
 	m_Material.Wireframe = true;
@@ -43,10 +45,10 @@ EarthVisualization::EarthVisualization(scene::ISceneNode* parent,
 void EarthVisualization::init()
 {
 	m_vIndices = 0;
-	m_nLevel = 14;
+	//m_nLevel = 14;
 	m_uTriangleUnderUs = 1;
-	setTriangleUnderUs(JWTriangle::getParentTriangle(
-			0b01010101010101010101010101010000, m_nLevel + 1));
+	setTriangleUnderUs(JWTriangle::cropToLevel(
+			0b01010101010101010101010101010000, m_nLevel));
 
 	//generateMesh();
 }
@@ -109,8 +111,8 @@ void EarthVisualization::addTriangleToMesh(u32 triangle)
 		if (m_mapVerteces.getPtrKeys()[hash] == EMPTY_KEY)
 		{
 			core::vector3df* ptrVertPos = m_Sphere.getVertex(vertexId);
-			video::S3DVertex vert(*ptrVertPos + m_vrtCenter, *ptrVertPos, video::SColor(255,
-					0, 255, 0), core::vector2d<f32>(0, 0));
+			video::S3DVertex vert(*ptrVertPos + m_vrtCenter, *ptrVertPos,
+					video::SColor(255, 0, 255, 0), core::vector2d<f32>(0, 0));
 			vert.Normal.normalize();
 			paintVertex(vertexId, &vert);
 			m_mapVerteces.put(vertexId, &vert);
@@ -221,5 +223,17 @@ void EarthVisualization::paintVertex(u32 vertexId, video::S3DVertex *v)
 			break;
 		}
 	}
+}
+
+int EarthVisualization::getLevel() const
+{
+	return m_nLevel;
+}
+
+void EarthVisualization::setLevel(int level)
+{
+	this->m_nLevel = level;
+	m_uTriangleUnderUs = JWTriangle::cropToLevel(m_uTriangleUnderUs, level);
+	generateMesh();
 }
 

@@ -93,7 +93,12 @@ int JWTriangle::getTriangleNumber(u32 trIndex, int level)
 u32 JWTriangle::getParentTriangle(u32 trIndex, int level)
 {
 	//assert that level > 0
-	return trIndex & (0x7FFFFFFF >> (MAX_TRIANGLE_LEVELS * 2 - level * 2 + 2));
+	return trIndex & (0x7FFFFFFF >> ((MAX_TRIANGLE_LEVELS - level + 1) * 2));
+}
+
+u32 JWTriangle::cropToLevel(u32 trIndex, int level)
+{
+	return trIndex & (0x7FFFFFFF >> ((MAX_TRIANGLE_LEVELS - level) * 2));
 }
 
 void JWTriangle::getSubtrianglesAtEdge(u32 trIndex, int level, int edge,

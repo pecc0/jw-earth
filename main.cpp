@@ -37,7 +37,7 @@ using namespace gui;
 
 enum
 {
-	GUI_ID_TRANSPARENCY_SCROLL_BAR = 101
+	GUI_ID_SPEED_SCROLL = 101, GUI_ID_LEVEL
 };
 
 #define GUI_X 5
@@ -47,7 +47,7 @@ enum
 
 IrrlichtDevice *g_Device;
 JWSceneNodeAnimatorCameraFPS* g_CameraAnimator;
-EarthVisualization *g_EarthVisualization;
+EarthVisualization* g_EarthVisualization;
 class MyEventReceiver: public IEventReceiver
 {
 public:
@@ -79,12 +79,18 @@ public:
 			switch (event.GUIEvent.EventType)
 			{
 			case EGET_SCROLL_BAR_CHANGED:
-				if (id == GUI_ID_TRANSPARENCY_SCROLL_BAR)
+			{
+				IGUIScrollBar* scroll = (IGUIScrollBar*) event.GUIEvent.Caller;
+				const s32 pos = scroll->getPos();
+				if (id == GUI_ID_SPEED_SCROLL)
 				{
-					const s32 pos =
-							((IGUIScrollBar*) event.GUIEvent.Caller)->getPos();
 					g_CameraAnimator->setMoveSpeed(pos * pos / 100000.0);
 				}
+				else if (id == GUI_ID_LEVEL)
+				{
+					g_EarthVisualization->setLevel(pos);
+				}
+			}
 				break;
 			default:
 				break;
@@ -142,10 +148,12 @@ int main()
 
 	skin->setFont(env->getBuiltInFont(), EGDF_TOOLTIP);
 
-	env->addStaticText(L"Movement speed:", rect<s32> (GUI_X, GUI_Y,
-			GUI_X + 200, GUI_Y + 20), true);
-	IGUIScrollBar* scrollbar = env->addScrollBar(true, rect<s32> (GUI_X, GUI_Y
-			+ 25, GUI_X + 200, GUI_Y + 45), 0, GUI_ID_TRANSPARENCY_SCROLL_BAR);
+	env->addStaticText(L"Movement speed:", rect<s32> (GUI_X, GUI_Y, GUI_X + 95,
+			GUI_Y + 20), true);
+	IGUIScrollBar* scrollbar = env->addScrollBar(true, rect<s32> (GUI_X + 100,
+			GUI_Y, GUI_X + 100 + 200, GUI_Y + 20), 0, GUI_ID_SPEED_SCROLL);
+
+	//scrollbar->drop();
 
 	//max speed -> 1000 * 1000 / 100000 = 10 km/frame
 	//min speed -> 10 * 10 / 100000 = 1m / frame
@@ -161,6 +169,16 @@ int main()
 	g_CameraAnimator = JWSceneNodeAnimatorCameraFPS::injectOnFPSCamera(camera);
 	g_CameraAnimator->setMoveSpeed(scrollbar->getPos() / 5000.0);
 	g_CameraAnimator->setAnimationEventsReceiver(&receiver);
+
+	env->addStaticText(L"Level:", rect<s32> (GUI_X, GUI_Y + 22, GUI_X + 95,
+			GUI_Y + 22 + 20), true);
+	scrollbar = env->addScrollBar(true, rect<s32> (GUI_X + 100, GUI_Y + 22,
+			GUI_X + 100 + 200, GUI_Y + 22 + 20), 0, GUI_ID_LEVEL);
+
+#define START_LEVEL 5
+	scrollbar->setMax(14);
+	scrollbar->setMin(0);
+	scrollbar->setPos(START_LEVEL);
 
 	SKeyMap keyMap[] =
 	{
@@ -199,7 +217,7 @@ int main()
 	 the reference count of the object is after creation.
 	 */
 	g_EarthVisualization = new EarthVisualization(smgr->getRootSceneNode(),
-			smgr, 666, earthCenter, EARTH_RADIUS);
+			smgr, 666, START_LEVEL, earthCenter, EARTH_RADIUS);
 
 	/*
 	 To animate something in this boring scene consisting only of one
@@ -243,8 +261,7 @@ int main()
 	bill->setMaterialFlag(video::EMF_LIGHTING, false);
 	bill->setMaterialFlag(video::EMF_ZWRITE_ENABLE, false);
 	bill->setMaterialType(video::EMT_TRANSPARENT_ADD_COLOR);
-	bill->setMaterialTexture(0, driver->getTexture(
-			"media/particlered.bmp"));
+	bill->setMaterialTexture(0, driver->getTexture("media/particlered.bmp"));
 
 	//bill->drop();
 

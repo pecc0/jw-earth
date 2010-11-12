@@ -50,7 +50,7 @@ class EarthVisualization: public irr::scene::ISceneNode
 	void addTriangleToMesh(u32 triangle);
 public:
 	EarthVisualization(scene::ISceneNode *parent = 0,
-			scene::ISceneManager *mgr = 0, s32 id = 0,
+			scene::ISceneManager *mgr = 0, s32 id = 0, int level = 2,
 			const core::vector3df& center = core::vector3df(0.0f, 0.0f, 0.0f),
 			f32 radius = 12742.);
 	virtual ~EarthVisualization();
@@ -68,6 +68,8 @@ public:
 	u32 getUTriangleUnderUs() const;
 	void setTriangleUnderUs(u32 m_uTriangleUnderUs);
 	void paintVertex(u32 vertexId, video::S3DVertex* v);
+    int getLevel() const;
+    void setLevel(int level);
 };
 
 #endif /* EARTHVIS_H_ */

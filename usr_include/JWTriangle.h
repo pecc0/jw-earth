@@ -120,6 +120,11 @@ public:
 	static u32 getParentTriangle(u32 trIndex, int level);
 
 	/**
+	 * Unsets any insignificant bits in the triangle ID
+	 */
+	static u32 cropToLevel(u32 trIndex, int level);
+
+	/**
 	 * Returns the global IDs of the 2 sub-triangles of a triangle which share
 	 * edge with certain parent's edge.
 	 */
