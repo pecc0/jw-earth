@@ -22,7 +22,7 @@ using namespace irr;
 //At what level triangles and vertexes are not deleted
 #define PERSISTENT_CACHED_LEVEL 7
 
-#define SPHERE_RADIUS 12742.
+
 
 typedef int Direction;
 
@@ -58,10 +58,11 @@ class JWSphere
 	AutoCleanHashMap<core::vector3df> m_mapVertices;
 	AutoCleanHashMap<JWTriangle> m_vmapTriangles[MAX_TRIANGLE_LEVELS + 1];
 	IJWLogger *log;
+	f32 m_fRadius;
 public:
 	class BFSIterator;
 
-	JWSphere();
+	JWSphere(f32 radius);
 	virtual ~JWSphere();
 	core::vector3df *getVertex(u32 key);
 	JWTriangle *getTriangle(u32 key, int level);

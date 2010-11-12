@@ -21,8 +21,6 @@ using namespace __gnu_cxx;
 #pragma comment(lib, "Irrlicht.lib")
 #endif
 
-
-
 class EarthVisualization: public irr::scene::ISceneNode
 {
 	jw::JWSphere m_Sphere;
@@ -35,37 +33,41 @@ class EarthVisualization: public irr::scene::ISceneNode
 
 	core::aabbox3d<f32> m_Box;
 
-    video::SMaterial m_Material;
+	video::SMaterial m_Material;
 
-    u32 m_uTriangleUnderUs;
-    u32 m_vTriangleUnderUsPoints[3];
+	u32 m_uTriangleUnderUs;
+	u32 m_vTriangleUnderUsPoints[3];
 
-    int m_nLevel;
+	int m_nLevel;
 
-    core::vector3df m_vertViewerPoint;
+	core::vector3df m_vertViewerPoint;
 
-    void init();
-    void clear();
-    void addTriangleToMesh(u32 triangle);
+	core::vector3df m_vrtCenter;
+	f32 m_fRadius;
+
+	void init();
+	void clear();
+	void addTriangleToMesh(u32 triangle);
 public:
-    EarthVisualization();
-    EarthVisualization(scene::ISceneNode *parent, scene::ISceneManager *mgr, s32 id);
-    virtual ~EarthVisualization();
-    virtual void OnRegisterSceneNode();
-    virtual void render();
-    const virtual core::aabbox3d<f32>& getBoundingBox() const;
+	EarthVisualization(scene::ISceneNode *parent = 0,
+			scene::ISceneManager *mgr = 0, s32 id = 0,
+			const core::vector3df& center = core::vector3df(0.0f, 0.0f, 0.0f),
+			f32 radius = 12742.);
+	virtual ~EarthVisualization();
+	virtual void OnRegisterSceneNode();
+	virtual void render();
+	const virtual core::aabbox3d<f32>& getBoundingBox() const;
 
 	virtual u32 getMaterialCount();
 
 	virtual video::SMaterial& getMaterial(u32 i);
 
-
 	void generateMesh();
 	const core::vector3df& getViewerPoint() const;
-    void setViewerPoint(const core::vector3df& viewerPoint);
-    u32 getUTriangleUnderUs() const;
-    void setTriangleUnderUs(u32 m_uTriangleUnderUs);
-    void paintVertex(u32 vertexId, video::S3DVertex* v);
+	void setViewerPoint(const core::vector3df& viewerPoint);
+	u32 getUTriangleUnderUs() const;
+	void setTriangleUnderUs(u32 m_uTriangleUnderUs);
+	void paintVertex(u32 vertexId, video::S3DVertex* v);
 };
 
 #endif /* EARTHVIS_H_ */

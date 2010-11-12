@@ -43,6 +43,8 @@ enum
 #define GUI_X 5
 #define GUI_Y 5
 
+#define EARTH_RADIUS 12742.
+
 IrrlichtDevice *g_Device;
 JWSceneNodeAnimatorCameraFPS* g_CameraAnimator;
 EarthVisualization *g_EarthVisualization;
@@ -170,10 +172,12 @@ int main()
 	{ EKA_CROUCH, KEY_LSHIFT } };
 	g_CameraAnimator->setKeyMap(keyMap, 6);
 
-	camera->setFarValue(30000.f); //30 000 km
+	core::vector3df earthCenter(3000, 3000, 0);
+
+	camera->setFarValue(50000.f); //50 000 km
 	//camera->setUpVector(core::vector3df(0,0,1));
-	camera->setPosition(core::vector3df(0, 0, -SPHERE_RADIUS - 200.));
-	camera->setTarget(core::vector3df(0, 0, 0));
+	camera->setPosition(core::vector3df(0, 0, -EARTH_RADIUS - 200.));
+	camera->setTarget(earthCenter);
 
 	//camera->setFarValue(20000.f);
 
@@ -195,7 +199,7 @@ int main()
 	 the reference count of the object is after creation.
 	 */
 	g_EarthVisualization = new EarthVisualization(smgr->getRootSceneNode(),
-			smgr, 666);
+			smgr, 666, earthCenter, EARTH_RADIUS);
 
 	/*
 	 To animate something in this boring scene consisting only of one
@@ -233,7 +237,7 @@ int main()
 	//myNode = 0; // As I shouldn't refer to it again, ensure that I can't
 
 	scene::ISceneNode* bill = smgr->addBillboardSceneNode(0, core::dimension2d<
-			f32>(600, 600), core::vector3df(0, 0, 0), 113);
+			f32>(600, 600), earthCenter, 113);
 	//600x600 km billboard
 
 	bill->setMaterialFlag(video::EMF_LIGHTING, false);

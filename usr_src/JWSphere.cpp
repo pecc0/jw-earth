@@ -15,22 +15,22 @@ bool isVertexUndeletable(KEY key)
 	return key <= (8 << 14); //8 << 14 = 8 << (PERSISTENT_CACHED_LEVEL * 2)
 }
 
-jw::JWSphere::JWSphere() :
-	log(LoggerFactory::getLogger("com.jw.JWSphere"))
+jw::JWSphere::JWSphere(f32 radius) :
+	log(LoggerFactory::getLogger("com.jw.JWSphere")), m_fRadius(radius)
 {
 	log->info("Initialize JWSphere");
 	m_mapVertices = AutoCleanHashMap<core::vector3df> (1046527, 0.8, 0.2, 8
 			<< 14, &isVertexUndeletable);
 	m_mapVertices.init();
 
-	m_mapVertices.put(0, core::vector3df(0, SPHERE_RADIUS, 0));
-	m_mapVertices.put(1, core::vector3df(-SPHERE_RADIUS, 0, 0));
-	m_mapVertices.put(2, core::vector3df(0, 0, -SPHERE_RADIUS));
-	m_mapVertices.put(3, core::vector3df(0, 0, SPHERE_RADIUS));
+	m_mapVertices.put(0, core::vector3df(0, m_fRadius, 0));
+	m_mapVertices.put(1, core::vector3df(-m_fRadius, 0, 0));
+	m_mapVertices.put(2, core::vector3df(0, 0, -m_fRadius));
+	m_mapVertices.put(3, core::vector3df(0, 0, m_fRadius));
 	//OctahedronVertices[4] = NULL;
 	//OctahedronVertices[5] = NULL;
-	m_mapVertices.put(6, core::vector3df(SPHERE_RADIUS, 0, 0));
-	m_mapVertices.put(7, core::vector3df(0, -SPHERE_RADIUS, 0));
+	m_mapVertices.put(6, core::vector3df(m_fRadius, 0, 0));
+	m_mapVertices.put(7, core::vector3df(0, -m_fRadius, 0));
 	//Vertices[3].Color = video::SColor(255,
 	//		0, 0, 255);
 
@@ -266,7 +266,7 @@ void jw::JWSphere::divideTriangle(u32 triangle, int level)
 			core::vector3df* v2 = verteces[(edge + 1) % 3];
 
 			core::vector3df newVertex = (*v1) + (*v2);
-			newVertex.setLength(SPHERE_RADIUS);
+			newVertex.setLength(m_fRadius);
 
 			u32 vertexIndex = getTriangleVertex(newTrianglesIndexes[3], level
 					+ 1, (edge + 2) % 3, true);
@@ -544,7 +544,7 @@ u32 jw::JWSphere::getTriangleUnderPoint(int level,
 		const core::vector3df & inPoint)
 {
 	core::vector3df point(inPoint);
-	point.setLength(SPHERE_RADIUS);
+	point.setLength(m_fRadius);
 	u32 result = octahedronTriangleUnderPoint(point);
 
 	for (int l = 0; l < level; l++)

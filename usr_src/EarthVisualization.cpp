@@ -7,15 +7,9 @@
 
 #include "EarthVisualization.h"
 
-EarthVisualization::EarthVisualization() :
-	scene::ISceneNode(0, 0, 0)
-{
-	init();
-}
-
 EarthVisualization::EarthVisualization(scene::ISceneNode* parent,
-		scene::ISceneManager* mgr, s32 id) :
-	scene::ISceneNode(parent, mgr, id)
+		scene::ISceneManager* mgr, s32 id, const core::vector3df& center, f32 radius) :
+		 scene::ISceneNode(parent, mgr, id), m_Sphere(radius), m_vrtCenter(center), m_fRadius(radius)
 {
 
 	m_Material.Wireframe = true;
@@ -115,7 +109,7 @@ void EarthVisualization::addTriangleToMesh(u32 triangle)
 		if (m_mapVerteces.getPtrKeys()[hash] == EMPTY_KEY)
 		{
 			core::vector3df* ptrVertPos = m_Sphere.getVertex(vertexId);
-			video::S3DVertex vert(*ptrVertPos, *ptrVertPos, video::SColor(255,
+			video::S3DVertex vert(*ptrVertPos + m_vrtCenter, *ptrVertPos, video::SColor(255,
 					0, 255, 0), core::vector2d<f32>(0, 0));
 			vert.Normal.normalize();
 			paintVertex(vertexId, &vert);
@@ -157,7 +151,7 @@ void EarthVisualization::generateMesh()
 	jw::JWSphere::BFSIterator* i = m_Sphere.bfs(m_uTriangleUnderUs, m_nLevel);
 	u32 triangle;
 	core::vector3df startPt = m_vertViewerPoint;
-	startPt.setLength(SPHERE_RADIUS);
+	startPt.setLength(m_fRadius);
 
 	while (i->next(&triangle))
 	{
@@ -189,7 +183,7 @@ const core::vector3df& EarthVisualization::getViewerPoint() const
 
 void EarthVisualization::setViewerPoint(const core::vector3df& viewerPoint)
 {
-	this->m_vertViewerPoint = viewerPoint;
+	this->m_vertViewerPoint = viewerPoint - m_vrtCenter; //translate to sphere coordinates - center is at 0,0,0
 	u32 triangleUnderUs = m_Sphere.getTriangleUnderPoint(m_nLevel,
 			m_vertViewerPoint);
 	setTriangleUnderUs(triangleUnderUs);
