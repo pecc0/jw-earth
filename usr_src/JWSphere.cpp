@@ -454,6 +454,42 @@ u32 jw::JWSphere::getSubtriangleUnderPoint(u32 triangle, int level,
 	core::vector3df* r4 = getVertex(
 			getTriangleVertex(triangle, level, 0, false));
 
+	u32 t00 = 0;
+	u32 t01 = 1;
+	u32 t10 = 2;
+
+	f32 d0 = r4->getDistanceFromSQ(*r1);
+	f32 d1 = r4->getDistanceFromSQ(*r2);
+	//The triangles are either equilateral, or isosceles. In case
+	//of isosceles, we choose the point between the equal sides
+	//to be the origin of the barycentric coordinate system
+	if (fabsf(d0 - d1) > 1.e-5)
+	{
+		f32 d2 = r1->getDistanceFromSQ(*r2);
+		if (fabsf(d2 - d0) < 1.e-5)
+		{
+			core::vector3df* buf = r4;
+			r4 = r1;
+			r1 = r2;
+			r2 = buf;
+
+			t00 = 1;
+			t01 = 2;
+			t10 = 0;
+		}
+		else
+		{
+			core::vector3df* buf = r4;
+			r4 = r2;
+			r2 = r1;
+			r1 = buf;
+
+			t00 = 2;
+			t01 = 0;
+			t10 = 1;
+		}
+	}
+
 	core::vector3df bufR3;
 	{
 		//I'll calculate r3 so that r3 - r4 is orthogonal to the triangle surface, and |r3-r4| = radius.
@@ -480,10 +516,12 @@ u32 jw::JWSphere::getSubtriangleUnderPoint(u32 triangle, int level,
 
 	f32 correction = pointBarycentric.Z * 0.576689 / (2 << level);
 
-	if (level == 0) {
+	if (level == 1)
+	{
 		//log->info("cor=%f", correction);
-		log->info("(%f, %f, %f. c=%f r=%f)", pointBarycentric.X, pointBarycentric.Y,
-						pointBarycentric.Z, correction, point.getLength());
+		log->info("(%f, %f, %f. c=%f r=%f)", pointBarycentric.X,
+				pointBarycentric.Y, pointBarycentric.Z, correction,
+				point.getLength());
 	}
 	//Border between the triangles. In flat case this value should be 0.5, but due to
 	//we are in a sphere, we have to correct the value.
@@ -491,18 +529,18 @@ u32 jw::JWSphere::getSubtriangleUnderPoint(u32 triangle, int level,
 
 	if (pointBarycentric.X + pointBarycentric.Y < 1. - border)
 	{
-		return 0;
+		return t00;
 	}
 	else
 	{
 		//assert pointBarycentric.Y + pointBarycentric.Y < 1 - else the point is outside the triangle
 		if (pointBarycentric.X > border)
 		{
-			return 1;
+			return t01;
 		}
 		else if (pointBarycentric.Y > border)
 		{
-			return 2;
+			return t10;
 		}
 		else
 		{
