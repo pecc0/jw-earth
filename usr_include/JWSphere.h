@@ -16,13 +16,10 @@
 #include "IJWLogger.h"
 #include "matrix4.h"
 
-
 using namespace irr;
 
 //At what level triangles and vertexes are not deleted
 #define PERSISTENT_CACHED_LEVEL 7
-
-
 
 typedef int Direction;
 
@@ -53,7 +50,6 @@ using namespace log;
 
 class JWSphere
 {
-
 
 	AutoCleanHashMap<core::vector3df> m_mapVertices;
 	AutoCleanHashMap<JWTriangle> m_vmapTriangles[MAX_TRIANGLE_LEVELS + 1];
@@ -92,6 +88,14 @@ public:
 
 	BFSIterator* bfs(u32 startTr, int startLevel);
 
+	/**
+	 * Build a matrix for transformin into tetrahedron barycentric coordinate system
+	 * \param matrix reveicer
+	 * \param r1
+	 * \param r2
+	 * \param r3
+	 * \param r4
+	 */
 	static void buildTetrahedronBarycentricMatrix(core::matrix4& matrix,
 			const core::vector3df* r1, const core::vector3df* r2,
 			const core::vector3df* r3, const core::vector3df* r4);
@@ -103,7 +107,7 @@ public:
 
 	u32 getTriangleUnderPoint(int level, const core::vector3df & point);
 
-	class BFSIterator : virtual public IReferenceCounted
+	class BFSIterator: virtual public IReferenceCounted
 	{
 		JWSphere* m_sphere;
 		queue<u32> m_trQueue;
@@ -111,18 +115,17 @@ public:
 		int m_level;
 	public:
 		BFSIterator(JWSphere* sphere, u32 start, int level);
-		virtual ~BFSIterator() {
+		virtual ~BFSIterator()
+		{
 
 		}
-	    int getLevel() const;
-	    void setLevel(int m_level);
-	    bool next(u32* result);
-	    void accept(u32 triangle);
+		int getLevel() const;
+		void setLevel(int m_level);
+		bool next(u32* result);
+		void accept(u32 triangle);
 	};
 };
 
 }
-
-
 
 #endif /* JWSPHERE_H_ */
