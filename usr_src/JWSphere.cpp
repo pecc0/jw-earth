@@ -15,6 +15,8 @@ bool isVertexUndeletable(KEY key)
 	return key <= (8 << 14); //8 << 14 = 8 << (PERSISTENT_CACHED_LEVEL * 2)
 }
 
+core::vector3df g_Origin(0, 0, 0);
+
 jw::JWSphere::JWSphere(f32 radius) :
 	log(LoggerFactory::getLogger("com.jw.JWSphere")), m_fRadius(radius)
 {
@@ -445,106 +447,51 @@ f32 g_BorderFunc[14] =
 u32 jw::JWSphere::getSubtriangleUnderPoint(u32 triangle, int level,
 		const core::vector3df & point)
 {
+	core::vector3df* r0 = getVertex(
+			getTriangleVertex(triangle, level, 0, false));
 	core::vector3df* r1 = getVertex(
 			getTriangleVertex(triangle, level, 1, false));
 	core::vector3df* r2 = getVertex(
 			getTriangleVertex(triangle, level, 2, false));
-	core::vector3df* r3;
 	//The vertex 0 will be r4
-	core::vector3df* r4 = getVertex(
-			getTriangleVertex(triangle, level, 0, false));
-
-	u32 t00 = 0;
-	u32 t01 = 1;
-	u32 t10 = 2;
-
-	f32 d0 = r4->getDistanceFromSQ(*r1);
-	f32 d1 = r4->getDistanceFromSQ(*r2);
-	//The triangles are either equilateral, or isosceles. In case
-	//of isosceles, we choose the point between the equal sides
-	//to be the origin of the barycentric coordinate system
-	if (fabsf(d0 - d1) > 1.e-5)
-	{
-		f32 d2 = r1->getDistanceFromSQ(*r2);
-		if (fabsf(d2 - d0) < 1.e-5)
-		{
-			core::vector3df* buf = r4;
-			r4 = r1;
-			r1 = r2;
-			r2 = buf;
-
-			t00 = 1;
-			t01 = 2;
-			t10 = 0;
-		}
-		else
-		{
-			core::vector3df* buf = r4;
-			r4 = r2;
-			r2 = r1;
-			r1 = buf;
-
-			t00 = 2;
-			t01 = 0;
-			t10 = 1;
-		}
-	}
-
-	core::vector3df bufR3;
-	{
-		//I'll calculate r3 so that r3 - r4 is orthogonal to the triangle surface, and |r3-r4| = radius.
-		//This way in the Z berycentric coordinate I receive the distance from the point to the triangle.
-		//If the point is on the sphere, the distance to the triangle will be used to correct the border value
-		core::vector3df r1r4 = (*r1) - (*r4);
-		core::vector3df r2r4 = (*r2) - (*r4);
-		bufR3 = r2r4.crossProduct(r1r4);
-		//bufR3.normalize();
-		bufR3.setLength(m_fRadius);
-		bufR3 += (*r4);
-	}
-	r3 = &bufR3;
+	core::vector3df* r3 = &g_Origin;
 
 	core::matrix4 matrT;
-
-	buildTetrahedronBarycentricMatrix(matrT, r1, r2, r3, r4);
+	buildTetrahedronBarycentricMatrix(matrT, r0, r1, r2, r3);
 
 	core::vector3df pointBarycentric;
 
 	matrT.transformVect(pointBarycentric, point);
 
-	//pointBarycentric.Z = pointBarycentric.Z / m_fRadius;
+	//Projection of the barycentric coordinates onto the traingle (1,0,0), (0,1,0), (0,0,1)
+	f32 trX, trY;
+	f32 sum = pointBarycentric.X + pointBarycentric.Y + pointBarycentric.Z;
+	trX = pointBarycentric.X / sum;
+	trY = pointBarycentric.Y / sum;
 
-	f32 correction = pointBarycentric.Z * 0.576689 / (2 << level);
-
-	if (level == 1)
+	if (level == 0)
 	{
-		//log->info("cor=%f", correction);
-		//log->info("(%f, %f, %f. c=%f r=%f)", pointBarycentric.X,
-		//		pointBarycentric.Y, pointBarycentric.Z, correction,
-		//		point.getLength());
+		//log->info("(%f, %f)", trX, trY);
 	}
-	//Border between the triangles. In flat case this value should be 0.5, but due to
-	//we are in a sphere, we have to correct the value.
-	f32 border = 0.5 + correction;
-
-	if (pointBarycentric.X + pointBarycentric.Y < 1. - border)
+	//I chose (2,0) to be X axis, (2,1) to be the Y axis,
+	//so vertex 2 is the origin of the triangle coordinate system
+	if (trX + trY < 0.5)
 	{
-		return t00;
+		return 2;
 	}
 	else
 	{
-		//assert pointBarycentric.Y + pointBarycentric.Y < 1 - else the point is outside the triangle
-		if (pointBarycentric.X > border)
+		if (trX > 0.5)
 		{
-			return t01;
+			return 0;
 		}
-		else if (pointBarycentric.Y > border)
+		else if (trY > 0.5)
 		{
-			return t10;
+			return 1;
 		}
 		else
 		{
-			//both are < tresshold.
+			//both are < 0.5
 			return 3;
 		}
 	}
