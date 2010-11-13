@@ -27,10 +27,11 @@ class JWSceneNodeAnimatorCameraFPS: public ISceneNodeAnimatorCameraFPS
 {
 private:
 	ISceneNodeAnimatorCameraFPS* m_Wrapped;
-	IEventReceiver* m_animationEventsReceiver;
+	IEventReceiver* m_AnimationEventsReceiver;
 	typedef std::map<EKEY_CODE, s32> TKeyMap;
 	TKeyMap KeyMap;
 	bool CursorKeys[EKA_COUNT];
+	s32 m_LastAnimationTime;
 public:
 	JWSceneNodeAnimatorCameraFPS(ISceneNodeAnimatorCameraFPS* wrapped);
 	virtual ~JWSceneNodeAnimatorCameraFPS();
