@@ -519,9 +519,9 @@ u32 jw::JWSphere::getSubtriangleUnderPoint(u32 triangle, int level,
 	if (level == 1)
 	{
 		//log->info("cor=%f", correction);
-		log->info("(%f, %f, %f. c=%f r=%f)", pointBarycentric.X,
-				pointBarycentric.Y, pointBarycentric.Z, correction,
-				point.getLength());
+		//log->info("(%f, %f, %f. c=%f r=%f)", pointBarycentric.X,
+		//		pointBarycentric.Y, pointBarycentric.Z, correction,
+		//		point.getLength());
 	}
 	//Border between the triangles. In flat case this value should be 0.5, but due to
 	//we are in a sphere, we have to correct the value.
