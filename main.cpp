@@ -25,6 +25,7 @@
 #include "irrlitch/JWSceneNodeAnimatorCameraFPS.h"
 #include "sstream"
 #include "iomanip"
+#include <stdlib.h>
 
 using namespace core;
 using namespace irr;
@@ -281,17 +282,11 @@ int main()
 		if (++frames == 100)
 		{
 			core::stringw str = L"Irrlicht Engine [";
-			wchar_t val[33] =
-			{ 0 };
-			_itow(g_EarthVisualization->getUTriangleUnderUs(), val, 2);
 			str += driver->getName();
 			str += L"] FPS: ";
 			str += (s32) driver->getFPS();
 			str += L"] Tile: ";
-			std::wstringstream ss;
-			ss << std::setw(32) << std::setfill(L'0') << val;
-			//str += val;
-			str += ss.str().c_str();
+			str.printBinary(g_EarthVisualization->getUTriangleUnderUs(), 32, L'0', L'1');
 			g_Device->setWindowCaption(str.c_str());
 			frames = 0;
 		}

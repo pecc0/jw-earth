@@ -1083,6 +1083,14 @@ public:
 		return ret.size()-oldSize;
 	}
 
+	void printBinary(u32 val, int bits, T zero, T one)
+	{
+		while (bits > 0)
+		{
+			--bits;
+			this->append(val & (1 << bits) ? one : zero);
+		}
+	}
 private:
 
 	//! Reallocate the array, make it bigger or smaller
