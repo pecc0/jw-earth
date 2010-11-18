@@ -101,11 +101,11 @@ video::SMaterial& EarthVisualization::getMaterial(u32 i)
 	return m_Material;
 }
 
-void EarthVisualization::addTriangleToMesh(u32 triangle)
+void EarthVisualization::addTriangleToMesh(u32 triangle, int level)
 {
 	for (int j = 2; j >= 0; --j)
 	{
-		u32 vertexId = m_Sphere.getTriangleVertex(triangle, m_nLevel, j, false);
+		u32 vertexId = m_Sphere.getTriangleVertex(triangle, level, j, false);
 
 		int hash = m_mapVerteces.hash(vertexId);
 		if (m_mapVerteces.getPtrKeys()[hash] == EMPTY_KEY)
@@ -150,28 +150,33 @@ void EarthVisualization::generateMesh()
 	 addTriangleToMesh(g_TrianglesBuf[i]);
 	 }
 	 */
-	jw::JWSphere::BFSIterator* i = m_Sphere.bfs(m_uTriangleUnderUs, m_nLevel);
-	u32 triangle;
-	core::vector3df startPt = m_vertViewerPoint;
-	startPt.setLength(m_fRadius);
 
-	while (i->next(&triangle))
+	int level = m_nLevel;
+	jw::JWSphere::BFSIterator* i = m_Sphere.bfs(m_uTriangleUnderUs, level);
+	u32 triangle = m_uTriangleUnderUs;
+	core::vector3df startPt = m_vertViewerPoint;
+	//startPt.setLength(m_fRadius);
+
+	while (m_nTrCount < 2000)
 	{
-		if (m_nTrCount < 2000)
+		u32 vertexId = m_Sphere.getTriangleVertex(triangle, level, 0, false);
+		core::vector3df* ptrVertPos = m_Sphere.getVertex(vertexId);
+		if (ptrVertPos->getDistanceFrom(startPt) < 200000 >> level)
 		{
-			u32 vertexId = m_Sphere.getTriangleVertex(triangle, m_nLevel, 0,
-					false);
-			core::vector3df* ptrVertPos = m_Sphere.getVertex(vertexId);
-			if (ptrVertPos->getDistanceFrom(startPt) < 200000 >> m_nLevel)
-			{
-				addTriangleToMesh(triangle);
-				i->accept(triangle);
-				m_nTrCount++;
+			addTriangleToMesh(triangle, level);
+			i->accept(triangle);
+
+			if (!i->next(&triangle)) {
+				break;
 			}
-		}
-		else
-		{
-			break;
+			m_nTrCount++;
+		} else {
+			--level;
+			if (level < 0) {
+				break;
+			}
+			triangle = JWTriangle::cropToLevel(triangle, level);
+			i = m_Sphere.bfs(i, level);
 		}
 	}
 

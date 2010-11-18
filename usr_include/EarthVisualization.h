@@ -47,7 +47,7 @@ class EarthVisualization: public irr::scene::ISceneNode
 
 	void init();
 	void clear();
-	void addTriangleToMesh(u32 triangle);
+	void addTriangleToMesh(u32 triangle, int level);
 public:
 	EarthVisualization(scene::ISceneNode *parent = 0,
 			scene::ISceneManager *mgr = 0, s32 id = 0, int level = 2,

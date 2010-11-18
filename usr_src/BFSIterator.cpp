@@ -13,8 +13,32 @@ namespace jw
 JWSphere::BFSIterator::BFSIterator(JWSphere* sphere, u32 start, int level) :
 	m_sphere(sphere), m_level(level)
 {
+	start = JWTriangle::cropToLevel(start, level);
 	m_trQueue.push(start);
 	m_trUsed.insert(start);
+}
+
+JWSphere::BFSIterator::BFSIterator(JWSphere::BFSIterator * old, int level) :
+	m_sphere(old->m_sphere), m_level(level)
+{
+	set<u32>::iterator i;
+	for (i = old->m_trUsed.begin(); i != old->m_trUsed.end(); ++i)
+	{
+		u32 tr = JWTriangle::cropToLevel(*i, level);
+		m_trUsed.insert(tr);
+	}
+
+	while (!old->m_trQueue.empty())
+	{
+		u32 tr = JWTriangle::cropToLevel(old->m_trQueue.front(), level);
+		old->m_trQueue.pop();
+		if (m_trUsed.find(tr) == m_trUsed.end())
+		{
+			m_trQueue.push(tr);
+			m_trUsed.insert(tr);
+		}
+
+	}
 }
 
 int JWSphere::BFSIterator::getLevel() const

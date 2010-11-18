@@ -419,6 +419,12 @@ jw::JWSphere::BFSIterator *jw::JWSphere::bfs(u32 startTr, int startLevel)
 	return new BFSIterator(this, startTr, startLevel);
 }
 
+jw::JWSphere::BFSIterator *jw::JWSphere::bfs(jw::JWSphere::BFSIterator * old, int newLevel)
+{
+	BFSIterator * result = new BFSIterator(old, newLevel);
+	old->drop();
+	return result;
+}
 //--------------------- Triangle under point ---------------------
 u32 jw::JWSphere::octahedronTriangleUnderPoint(const core::vector3df & point)
 {

@@ -88,6 +88,8 @@ public:
 
 	BFSIterator* bfs(u32 startTr, int startLevel);
 
+	BFSIterator* bfs(jw::JWSphere::BFSIterator * old, int startLevel);
+
 	/**
 	 * Build a matrix for transformin into tetrahedron barycentric coordinate system
 	 * \param matrix reveicer
@@ -115,6 +117,7 @@ public:
 		int m_level;
 	public:
 		BFSIterator(JWSphere* sphere, u32 start, int level);
+		BFSIterator(BFSIterator* old, int level);
 		virtual ~BFSIterator()
 		{
 
@@ -123,6 +126,7 @@ public:
 		void setLevel(int m_level);
 		bool next(u32* result);
 		void accept(u32 triangle);
+		friend class JWSphere;
 	};
 };
 
