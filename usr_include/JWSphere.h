@@ -48,6 +48,8 @@ using namespace log;
  * So then we choose the triangle with lower index of the 2.
  */
 
+class BFSIterator;
+
 class JWSphere
 {
 
@@ -56,7 +58,6 @@ class JWSphere
 	IJWLogger *log;
 	f32 m_fRadius;
 public:
-	class BFSIterator;
 
 	JWSphere(f32 radius);
 	virtual ~JWSphere();
@@ -88,7 +89,7 @@ public:
 
 	BFSIterator* bfs(u32 startTr, int startLevel);
 
-	BFSIterator* bfs(jw::JWSphere::BFSIterator * old, int startLevel);
+	BFSIterator* bfs(jw::BFSIterator * old, int startLevel);
 
 	/**
 	 * Build a matrix for transformin into tetrahedron barycentric coordinate system
@@ -109,33 +110,34 @@ public:
 
 	u32 getTriangleUnderPoint(int level, const core::vector3df & point);
 
-	class BFSIterator: virtual public IReferenceCounted
+};
+
+class BFSIterator: virtual public IReferenceCounted
+{
+	JWSphere* m_sphere;
+	queue<u32> m_trQueue;
+	set<u32> m_trUsed;
+	int m_level;
+public:
+	BFSIterator(JWSphere* sphere, int level);
+	BFSIterator(JWSphere* sphere, u32 start, int level);
+	BFSIterator(BFSIterator* old, int level);
+	virtual ~BFSIterator()
 	{
-		JWSphere* m_sphere;
-		queue<u32> m_trQueue;
-		set<u32> m_trUsed;
-		int m_level;
-	public:
-		BFSIterator(JWSphere* sphere, int level);
-		BFSIterator(JWSphere* sphere, u32 start, int level);
-		BFSIterator(BFSIterator* old, int level);
-		virtual ~BFSIterator()
-		{
 
-		}
-		int getLevel() const;
-		void setLevel(int m_level);
-		bool next(u32* result);
-		void accept(u32 triangle);
-		/**
-		 * Checks whether the triangle is in the used triangles set.
-		 */
-		bool isUsed(u32 tr);
-		void setUsed(u32 tr);
-		void push(u32 triangle);
+	}
+	int getLevel() const;
+	void setLevel(int m_level);
+	bool next(u32* result);
+	void accept(u32 triangle);
+	/**
+	 * Checks whether the triangle is in the used triangles set.
+	 */
+	bool isUsed(u32 tr);
+	void setUsed(u32 tr);
+	void push(u32 triangle);
 
-		friend class JWSphere;
-	};
+	friend class JWSphere;
 };
 
 }

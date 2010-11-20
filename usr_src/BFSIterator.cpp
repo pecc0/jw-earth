@@ -10,13 +10,13 @@
 namespace jw
 {
 
-JWSphere::BFSIterator::BFSIterator(JWSphere* sphere, int level) :
+BFSIterator::BFSIterator(JWSphere* sphere, int level) :
 	m_sphere(sphere), m_level(level)
 {
 
 }
 
-JWSphere::BFSIterator::BFSIterator(JWSphere* sphere, u32 start, int level) :
+BFSIterator::BFSIterator(JWSphere* sphere, u32 start, int level) :
 	m_sphere(sphere), m_level(level)
 {
 	start = JWTriangle::cropToLevel(start, level);
@@ -24,7 +24,7 @@ JWSphere::BFSIterator::BFSIterator(JWSphere* sphere, u32 start, int level) :
 	m_trUsed.insert(start);
 }
 
-JWSphere::BFSIterator::BFSIterator(JWSphere::BFSIterator * old, int level) :
+BFSIterator::BFSIterator(BFSIterator * old, int level) :
 	m_sphere(old->m_sphere), m_level(level)
 {
 	set<u32>::iterator i;
@@ -47,32 +47,32 @@ JWSphere::BFSIterator::BFSIterator(JWSphere::BFSIterator * old, int level) :
 	}
 }
 
-bool JWSphere::BFSIterator::isUsed(u32 tr)
+bool BFSIterator::isUsed(u32 tr)
 {
 	return m_trUsed.find(tr) == m_trUsed.end();
 }
 
-void JWSphere::BFSIterator::setUsed(u32 tr)
+void BFSIterator::setUsed(u32 tr)
 {
 	m_trUsed.insert(tr);
 }
 
-void JWSphere::BFSIterator::push(u32 triangle)
+void BFSIterator::push(u32 triangle)
 {
 	m_trQueue.push(triangle);
 }
 
-int JWSphere::BFSIterator::getLevel() const
+int BFSIterator::getLevel() const
 {
 	return m_level;
 }
 
-void JWSphere::BFSIterator::setLevel(int m_level)
+void BFSIterator::setLevel(int m_level)
 {
 	this->m_level = m_level;
 }
 
-bool JWSphere::BFSIterator::next(u32* result)
+bool BFSIterator::next(u32* result)
 {
 	if (m_trQueue.empty())
 	{
@@ -83,7 +83,7 @@ bool JWSphere::BFSIterator::next(u32* result)
 	return true;
 }
 
-void JWSphere::BFSIterator::accept(u32 triangle)
+void BFSIterator::accept(u32 triangle)
 {
 	JWTriangle* tr = m_sphere->getTriangle(triangle, m_level);
 	for (int i = 0; i < 3; i++)

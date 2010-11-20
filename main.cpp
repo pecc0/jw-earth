@@ -176,7 +176,7 @@ int main()
 	scrollbar = env->addScrollBar(true, rect<s32> (GUI_X + 100, GUI_Y + 22,
 			GUI_X + 100 + 200, GUI_Y + 22 + 20), 0, GUI_ID_LEVEL);
 
-#define START_LEVEL 5
+#define START_LEVEL 14
 	scrollbar->setMax(14);
 	scrollbar->setMin(0);
 	scrollbar->setPos(START_LEVEL);
@@ -195,7 +195,7 @@ int main()
 
 	camera->setFarValue(50000.f); //50 000 km
 	//camera->setUpVector(core::vector3df(0,0,1));
-	camera->setPosition(core::vector3df(0, 0, -EARTH_RADIUS - 200.));
+	camera->setPosition(core::vector3df(100, 100, -EARTH_RADIUS - 200.));
 	camera->setTarget(earthCenter);
 
 	//camera->setFarValue(20000.f);

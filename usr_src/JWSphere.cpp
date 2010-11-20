@@ -414,12 +414,12 @@ u32 jw::JWSphere::getNeighborTriangle(u32 triangle, int level,
 
 //--------------------- end of rectangular part of the sphere ---------------------
 
-jw::JWSphere::BFSIterator *jw::JWSphere::bfs(u32 startTr, int startLevel)
+jw::BFSIterator *jw::JWSphere::bfs(u32 startTr, int startLevel)
 {
 	return new BFSIterator(this, startTr, startLevel);
 }
 
-jw::JWSphere::BFSIterator *jw::JWSphere::bfs(jw::JWSphere::BFSIterator * old, int newLevel)
+jw::BFSIterator *jw::JWSphere::bfs(jw::BFSIterator * old, int newLevel)
 {
 	BFSIterator * result = new BFSIterator(old, newLevel);
 	old->drop();

@@ -152,7 +152,7 @@ void EarthVisualization::generateMesh()
 	 */
 
 	int level = m_nLevel;
-	jw::JWSphere::BFSIterator* i = m_Sphere.bfs(m_uTriangleUnderUs, level);
+	jw::BFSIterator* i = m_Sphere.bfs(m_uTriangleUnderUs, level);
 	u32 triangle = m_uTriangleUnderUs;
 	core::vector3df startPt = m_vertViewerPoint;
 	//startPt.setLength(m_fRadius);
@@ -180,13 +180,13 @@ void EarthVisualization::generateMesh()
 				break;
 			}
 			//i = m_Sphere.bfs(i, level);
-			jw::JWSphere::BFSIterator* newIterator =
-					new jw::JWSphere::BFSIterator(&m_Sphere, level);
+			jw::BFSIterator* newIterator =
+					new jw::BFSIterator(&m_Sphere, level);
 			//u32 remain = triangle;
 			do
 			{
 				triangle = JWTriangle::cropToLevel(triangle, level);
-				for (int subtr = 0; subtr < 4; subtr++)
+ 				for (int subtr = 0; subtr < 4; subtr++)
 				{
 					u32 childTr = JWTriangle::getChildIndex(triangle, subtr,
 							level);
