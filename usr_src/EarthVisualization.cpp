@@ -186,15 +186,24 @@ void EarthVisualization::generateMesh()
 			do
 			{
 				triangle = JWTriangle::cropToLevel(triangle, level);
- 				for (int subtr = 0; subtr < 4; subtr++)
+				for (int subtr = 0; subtr < 4; subtr++)
 				{
 					u32 childTr = JWTriangle::getChildIndex(triangle, subtr,
 							level);
 					if (!i->isUsed(childTr))
 					{
 						addTriangleToMesh(childTr, level + 1);
+						m_nTrCount++;
+						if (m_nTrCount >= 2000)
+						{
+							break;
+						}
 						i->setUsed(childTr);
 					}
+				}
+				if (m_nTrCount >= 2000)
+				{
+					break;
 				}
 				if (!newIterator->isUsed(triangle))
 				{
