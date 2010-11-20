@@ -151,18 +151,19 @@ void EarthVisualization::generateMesh()
 	 }
 	 */
 
-	int level = m_nLevel;
+	int level = MAX_TRIANGLE_LEVELS;
 	jw::BFSIterator* i = m_Sphere.bfs(m_uTriangleUnderUs, level);
 	u32 triangle = m_uTriangleUnderUs;
 	core::vector3df startPt = m_vertViewerPoint;
 	//startPt.setLength(m_fRadius);
-
+	bool addingStarted = false;
 	while (m_nTrCount < 2000)
 	{
 		u32 vertexId = m_Sphere.getTriangleVertex(triangle, level, 0, false);
 		core::vector3df* ptrVertPos = m_Sphere.getVertex(vertexId);
-		if (ptrVertPos->getDistanceFrom(startPt) < 200000 >> level)
+		if (isPointVisibleAtLevel(ptrVertPos->getDistanceFrom(startPt), level))
 		{
+			addingStarted = true;
 			addTriangleToMesh(triangle, level);
 			i->accept(triangle);
 
@@ -179,42 +180,63 @@ void EarthVisualization::generateMesh()
 			{
 				break;
 			}
-			//i = m_Sphere.bfs(i, level);
-			jw::BFSIterator* newIterator =
-					new jw::BFSIterator(&m_Sphere, level);
-			//u32 remain = triangle;
-			do
+			if (addingStarted)
+			{
+
+				//i = m_Sphere.bfs(i, level);
+				jw::BFSIterator* newIterator = new jw::BFSIterator(&m_Sphere,
+						level);
+
+				set<u32>::iterator setiter;
+				for (setiter = i->getUsedSet()->begin(); setiter
+						!= i->getUsedSet()->end(); ++setiter)
+				{
+					newIterator->setUsed(JWTriangle::cropToLevel(*setiter,
+							level));
+				}
+
+				//u32 remain = triangle;
+				do
+				{
+					triangle = JWTriangle::cropToLevel(triangle, level);
+					for (int subtr = 0; subtr < 4; subtr++)
+					{
+						u32 childTr = JWTriangle::getChildIndex(triangle,
+								subtr, level);
+						if (!i->isUsed(childTr))
+						{
+							addTriangleToMesh(childTr, level + 1);
+							m_nTrCount++;
+							if (m_nTrCount >= 2000)
+							{
+								break;
+							}
+							i->setUsed(childTr);
+						}
+					}
+					if (m_nTrCount >= 2000)
+					{
+						break;
+					}
+
+					if (!newIterator->isUsed(triangle))
+					{
+						newIterator->setUsed(triangle);
+						newIterator->accept(triangle);
+					}
+
+				} while (i->next(&triangle));
+
+				i->drop();
+				i = newIterator;
+			}
+			else
 			{
 				triangle = JWTriangle::cropToLevel(triangle, level);
-				for (int subtr = 0; subtr < 4; subtr++)
-				{
-					u32 childTr = JWTriangle::getChildIndex(triangle, subtr,
-							level);
-					if (!i->isUsed(childTr))
-					{
-						addTriangleToMesh(childTr, level + 1);
-						m_nTrCount++;
-						if (m_nTrCount >= 2000)
-						{
-							break;
-						}
-						i->setUsed(childTr);
-					}
-				}
-				if (m_nTrCount >= 2000)
-				{
-					break;
-				}
-				if (!newIterator->isUsed(triangle))
-				{
-					newIterator->push(triangle);
-					newIterator->setUsed(triangle);
-				}
-
-			} while (i->next(&triangle));
-
-			i->drop();
-			i = newIterator;
+				i->drop();
+				i = m_Sphere.bfs(triangle, level);
+				m_nLevel = level;
+			}
 		}
 	}
 
@@ -226,12 +248,38 @@ const core::vector3df& EarthVisualization::getViewerPoint() const
 	return m_vertViewerPoint;
 }
 
+bool EarthVisualization::isPointVisibleAtLevel(f32 distance, int level)
+{
+	return distance < 200000 >> level;
+}
+
 void EarthVisualization::setViewerPoint(const core::vector3df& viewerPoint)
 {
 	this->m_vertViewerPoint = viewerPoint - m_vrtCenter; //translate to sphere coordinates - center is at 0,0,0
-	u32 triangleUnderUs = m_Sphere.getTriangleUnderPoint(m_nLevel,
+
+	int level;
+	//int level = (m_vertViewerPoint.getLength() - m_fRadius)
+	f32 distanceToGround = m_vertViewerPoint.getLength() - m_fRadius;
+	//TODO calculate without loop
+	for (level = MAX_TRIANGLE_LEVELS; level >= 0; --level) {
+		if (isPointVisibleAtLevel(distanceToGround, level)) {
+			break;
+		}
+	}
+
+	u32 triangleUnderUs = m_Sphere.getTriangleUnderPoint(level,
 			m_vertViewerPoint);
-	setTriangleUnderUs(triangleUnderUs);
+
+	if (triangleUnderUs != m_uTriangleUnderUs || m_nLevel != level)
+	{
+		setTriangleUnderUs( triangleUnderUs);
+		for (int i = 0; i < 3; i++)
+		{
+			m_vTriangleUnderUsPoints[i] = m_Sphere.getTriangleVertex(
+					m_uTriangleUnderUs, level, i, false);
+		}
+		generateMesh();
+	}
 
 }
 
@@ -242,17 +290,7 @@ u32 EarthVisualization::getUTriangleUnderUs() const
 
 void EarthVisualization::setTriangleUnderUs(u32 triangleUnderUs)
 {
-	if (triangleUnderUs != m_uTriangleUnderUs)
-	{
-		m_uTriangleUnderUs = triangleUnderUs;
-		for (int i = 0; i < 3; i++)
-		{
-			m_vTriangleUnderUsPoints[i] = m_Sphere.getTriangleVertex(
-					m_uTriangleUnderUs, m_nLevel, i, false);
-		}
-		generateMesh();
-	}
-
+	m_uTriangleUnderUs = triangleUnderUs;
 }
 
 void EarthVisualization::paintVertex(u32 vertexId, video::S3DVertex *v)

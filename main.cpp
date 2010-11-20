@@ -49,6 +49,7 @@ enum
 IrrlichtDevice *g_Device;
 JWSceneNodeAnimatorCameraFPS* g_CameraAnimator;
 EarthVisualization* g_EarthVisualization;
+IGUIScrollBar* g_LevelScroll;
 class MyEventReceiver: public IEventReceiver
 {
 public:
@@ -89,7 +90,7 @@ public:
 				}
 				else if (id == GUI_ID_LEVEL)
 				{
-					g_EarthVisualization->setLevel(pos);
+					//g_EarthVisualization->setLevel(pos);
 				}
 			}
 				break;
@@ -104,6 +105,8 @@ public:
 			{
 				ISceneNode* node = (ISceneNode*) event.UserEvent.UserData2;
 				g_EarthVisualization->setViewerPoint(node->getPosition());
+
+				g_LevelScroll->setPos(g_EarthVisualization->getLevel());
 			}
 
 		}
@@ -163,6 +166,7 @@ int main()
 
 	scrollbar->setPos(255);
 
+
 	// add a camera scene node
 	scene::ICameraSceneNode* camera = smgr->addCameraSceneNodeFPS();
 	//scene::ICameraSceneNode* camera = addCameraSceneNodeFPS(smgr);
@@ -180,6 +184,7 @@ int main()
 	scrollbar->setMax(14);
 	scrollbar->setMin(0);
 	scrollbar->setPos(START_LEVEL);
+	g_LevelScroll = scrollbar;
 
 	SKeyMap keyMap[] =
 	{
@@ -193,7 +198,7 @@ int main()
 
 	core::vector3df earthCenter(0, 0, 0);
 
-	camera->setFarValue(50000.f); //50 000 km
+	camera->setFarValue(500000.f); //500 000 km
 	//camera->setUpVector(core::vector3df(0,0,1));
 	camera->setPosition(core::vector3df(100, 100, -EARTH_RADIUS - 200.));
 	camera->setTarget(earthCenter);

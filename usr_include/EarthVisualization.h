@@ -70,6 +70,8 @@ public:
 	void paintVertex(u32 vertexId, video::S3DVertex* v);
     int getLevel() const;
     void setLevel(int level);
+
+    bool isPointVisibleAtLevel(f32 distance, int level);
 };
 
 #endif /* EARTHVIS_H_ */

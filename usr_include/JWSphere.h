@@ -137,6 +137,10 @@ public:
 	void setUsed(u32 tr);
 	void push(u32 triangle);
 
+	const set<u32>* getUsedSet() const {
+		return &m_trUsed;
+	}
+
 	friend class JWSphere;
 };
 
