@@ -14,7 +14,7 @@ EarthVisualization::EarthVisualization(scene::ISceneNode* parent,
 			m_vrtCenter(center), m_fRadius(radius)
 {
 
-	m_Material.Wireframe = true;
+	m_Material.Wireframe = false;
 	m_Material.Lighting = false;
 
 	m_mapVerteces = jw::AutoCleanHashMap<video::S3DVertex>(10000);

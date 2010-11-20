@@ -225,6 +225,8 @@ int main()
 	g_EarthVisualization = new EarthVisualization(smgr->getRootSceneNode(),
 			smgr, 666, START_LEVEL, earthCenter, EARTH_RADIUS);
 
+	g_EarthVisualization->setViewerPoint(camera->getPosition());
+
 	/*
 	 To animate something in this boring scene consisting only of one
 	 tetraeder, and to show that you now can use your scene node like any
