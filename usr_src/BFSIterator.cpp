@@ -10,6 +10,12 @@
 namespace jw
 {
 
+JWSphere::BFSIterator::BFSIterator(JWSphere* sphere, int level) :
+	m_sphere(sphere), m_level(level)
+{
+
+}
+
 JWSphere::BFSIterator::BFSIterator(JWSphere* sphere, u32 start, int level) :
 	m_sphere(sphere), m_level(level)
 {
@@ -39,6 +45,21 @@ JWSphere::BFSIterator::BFSIterator(JWSphere::BFSIterator * old, int level) :
 		}
 
 	}
+}
+
+bool JWSphere::BFSIterator::isUsed(u32 tr)
+{
+	return m_trUsed.find(tr) == m_trUsed.end();
+}
+
+void JWSphere::BFSIterator::setUsed(u32 tr)
+{
+	m_trUsed.insert(tr);
+}
+
+void JWSphere::BFSIterator::push(u32 triangle)
+{
+	m_trQueue.push(triangle);
 }
 
 int JWSphere::BFSIterator::getLevel() const
@@ -73,7 +94,6 @@ void JWSphere::BFSIterator::accept(u32 triangle)
 		{
 			m_trQueue.push(neigh);
 			m_trUsed.insert(neigh);
-
 		}
 	}
 }

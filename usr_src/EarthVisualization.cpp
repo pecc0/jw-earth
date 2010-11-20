@@ -166,17 +166,46 @@ void EarthVisualization::generateMesh()
 			addTriangleToMesh(triangle, level);
 			i->accept(triangle);
 
-			if (!i->next(&triangle)) {
+			if (!i->next(&triangle))
+			{
 				break;
 			}
 			m_nTrCount++;
-		} else {
+		}
+		else
+		{
 			--level;
-			if (level < 0) {
+			if (level < 0)
+			{
 				break;
 			}
-			triangle = JWTriangle::cropToLevel(triangle, level);
-			i = m_Sphere.bfs(i, level);
+			//i = m_Sphere.bfs(i, level);
+			jw::JWSphere::BFSIterator* newIterator =
+					new jw::JWSphere::BFSIterator(&m_Sphere, level);
+			//u32 remain = triangle;
+			do
+			{
+				triangle = JWTriangle::cropToLevel(triangle, level);
+				for (int subtr = 0; subtr < 4; subtr++)
+				{
+					u32 childTr = JWTriangle::getChildIndex(triangle, subtr,
+							level);
+					if (!i->isUsed(childTr))
+					{
+						addTriangleToMesh(childTr, level + 1);
+						i->setUsed(childTr);
+					}
+				}
+				if (!newIterator->isUsed(triangle))
+				{
+					newIterator->push(triangle);
+					newIterator->setUsed(triangle);
+				}
+
+			} while (i->next(&triangle));
+
+			i->drop();
+			i = newIterator;
 		}
 	}
 

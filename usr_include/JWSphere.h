@@ -116,6 +116,7 @@ public:
 		set<u32> m_trUsed;
 		int m_level;
 	public:
+		BFSIterator(JWSphere* sphere, int level);
 		BFSIterator(JWSphere* sphere, u32 start, int level);
 		BFSIterator(BFSIterator* old, int level);
 		virtual ~BFSIterator()
@@ -126,6 +127,13 @@ public:
 		void setLevel(int m_level);
 		bool next(u32* result);
 		void accept(u32 triangle);
+		/**
+		 * Checks whether the triangle is in the used triangles set.
+		 */
+		bool isUsed(u32 tr);
+		void setUsed(u32 tr);
+		void push(u32 triangle);
+
 		friend class JWSphere;
 	};
 };
