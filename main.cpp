@@ -262,6 +262,8 @@ int main()
 	g_EarthVisualization->drop();
 	//myNode = 0; // As I shouldn't refer to it again, ensure that I can't
 
+	g_EarthVisualization->setMaterialTexture(0, driver->getTexture("media/earth.bmp"));
+
 	scene::ISceneNode* bill = smgr->addBillboardSceneNode(0, core::dimension2d<
 			f32>(600, 600), earthCenter, 113);
 	//600x600 km billboard
