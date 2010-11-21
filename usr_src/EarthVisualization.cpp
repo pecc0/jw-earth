@@ -6,6 +6,8 @@
  */
 
 #include "EarthVisualization.h"
+#include <cmath>
+#include "irrMath.h"
 
 EarthVisualization::EarthVisualization(scene::ISceneNode* parent,
 		scene::ISceneManager* mgr, s32 id, int level,
@@ -14,7 +16,7 @@ EarthVisualization::EarthVisualization(scene::ISceneNode* parent,
 			m_vrtCenter(center), m_fRadius(radius)
 {
 
-	m_Material.Wireframe = false;
+	m_Material.Wireframe = true;
 	m_Material.Lighting = false;
 
 	m_mapVerteces = jw::AutoCleanHashMap<video::S3DVertex>(10000);
@@ -101,6 +103,11 @@ video::SMaterial& EarthVisualization::getMaterial(u32 i)
 	return m_Material;
 }
 
+const core::vector2d<f32> EarthVisualization::getSphericalCoordinates(const core::vector3df& v) const
+{
+	return core::vector2d<f32>(atan2(v.Z, v.X) / core::PI, acos(v.Y / m_fRadius) / core::PI);
+}
+
 void EarthVisualization::addTriangleToMesh(u32 triangle, int level)
 {
 	for (int j = 2; j >= 0; --j)
@@ -112,7 +119,7 @@ void EarthVisualization::addTriangleToMesh(u32 triangle, int level)
 		{
 			core::vector3df* ptrVertPos = m_Sphere.getVertex(vertexId);
 			video::S3DVertex vert(*ptrVertPos + m_vrtCenter, *ptrVertPos,
-					video::SColor(255, 0, 255, 0), core::vector2d<f32>(0, 0));
+					video::SColor(255, 0, 255, 0), getSphericalCoordinates(*ptrVertPos));
 			vert.Normal.normalize();
 			paintVertex(vertexId, &vert);
 			m_mapVerteces.put(vertexId, &vert);
@@ -261,8 +268,10 @@ void EarthVisualization::setViewerPoint(const core::vector3df& viewerPoint)
 	//int level = (m_vertViewerPoint.getLength() - m_fRadius)
 	f32 distanceToGround = m_vertViewerPoint.getLength() - m_fRadius;
 	//TODO calculate without loop
-	for (level = MAX_TRIANGLE_LEVELS; level >= 0; --level) {
-		if (isPointVisibleAtLevel(distanceToGround, level)) {
+	for (level = MAX_TRIANGLE_LEVELS; level >= 0; --level)
+	{
+		if (isPointVisibleAtLevel(distanceToGround, level))
+		{
 			break;
 		}
 	}
@@ -272,7 +281,7 @@ void EarthVisualization::setViewerPoint(const core::vector3df& viewerPoint)
 
 	if (triangleUnderUs != m_uTriangleUnderUs || m_nLevel != level)
 	{
-		setTriangleUnderUs( triangleUnderUs);
+		setTriangleUnderUs(triangleUnderUs);
 		for (int i = 0; i < 3; i++)
 		{
 			m_vTriangleUnderUsPoints[i] = m_Sphere.getTriangleVertex(

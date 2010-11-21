@@ -225,7 +225,17 @@ int main()
 	g_EarthVisualization = new EarthVisualization(smgr->getRootSceneNode(),
 			smgr, 666, START_LEVEL, earthCenter, EARTH_RADIUS);
 
+	g_EarthVisualization->setMaterialType(video::EMT_SOLID);
+
+	g_EarthVisualization->setMaterialTexture(0, driver->getTexture("media/earth.bmp"));
+
+	g_EarthVisualization->setMaterialFlag(video::EMF_LIGHTING, false);
+	g_EarthVisualization->setMaterialFlag(video::EMF_ZBUFFER, false);
+
+
 	g_EarthVisualization->setViewerPoint(camera->getPosition());
+
+
 
 	/*
 	 To animate something in this boring scene consisting only of one
@@ -262,7 +272,7 @@ int main()
 	g_EarthVisualization->drop();
 	//myNode = 0; // As I shouldn't refer to it again, ensure that I can't
 
-	g_EarthVisualization->setMaterialTexture(0, driver->getTexture("media/earth.bmp"));
+
 
 	scene::ISceneNode* bill = smgr->addBillboardSceneNode(0, core::dimension2d<
 			f32>(600, 600), earthCenter, 113);

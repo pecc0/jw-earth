@@ -68,10 +68,16 @@ public:
 	u32 getUTriangleUnderUs() const;
 	void setTriangleUnderUs(u32 m_uTriangleUnderUs);
 	void paintVertex(u32 vertexId, video::S3DVertex* v);
-    int getLevel() const;
-    void setLevel(int level);
+	int getLevel() const;
+	void setLevel(int level);
 
-    bool isPointVisibleAtLevel(f32 distance, int level);
+	bool isPointVisibleAtLevel(f32 distance, int level);
+
+	/**
+	 *	See
+	 *	http://www.euclideanspace.com/maths/geometry/space/coordinates/polar/spherical/index.htm
+	 */
+	const core::vector2d<f32> getSphericalCoordinates(const core::vector3df& v) const;
 };
 
 #endif /* EARTHVIS_H_ */
