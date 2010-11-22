@@ -13,7 +13,7 @@ EarthVisualization::EarthVisualization(scene::ISceneNode* parent,
 		scene::ISceneManager* mgr, s32 id, int level,
 		const core::vector3df& center, f32 radius) :
 	scene::ISceneNode(parent, mgr, id), m_Sphere(radius), m_nLevel(level),
-			m_vrtCenter(center), m_fRadius(radius)
+			m_vrtCenter(center), m_fRadius(radius), m_isMeshGenerated(true)
 {
 
 	m_Material.Wireframe = false;
@@ -103,9 +103,11 @@ video::SMaterial& EarthVisualization::getMaterial()
 	return m_Material;
 }
 
-const core::vector2d<f32> EarthVisualization::getSphericalCoordinates(const core::vector3df& v) const
+const core::vector2d<f32> EarthVisualization::getSphericalCoordinates(
+		const core::vector3df& v) const
 {
-	return core::vector2d<f32>(atan2(v.Z, v.X) / (core::PI * 2), acos(v.Y / m_fRadius) / (core::PI));
+	return core::vector2d<f32>(atan2(v.Z, v.X) / (core::PI * 2), acos(v.Y
+			/ m_fRadius) / (core::PI));
 }
 
 void EarthVisualization::addTriangleToMesh(u32 triangle, int level)
@@ -119,7 +121,8 @@ void EarthVisualization::addTriangleToMesh(u32 triangle, int level)
 		{
 			core::vector3df* ptrVertPos = m_Sphere.getVertex(vertexId);
 			video::S3DVertex vert(*ptrVertPos + m_vrtCenter, *ptrVertPos,
-					video::SColor(255, 200, 200, 200), getSphericalCoordinates(*ptrVertPos));
+					video::SColor(255, 200, 200, 200), getSphericalCoordinates(
+							*ptrVertPos));
 			vert.Normal.normalize();
 			paintVertex(vertexId, &vert);
 			m_mapVerteces.put(vertexId, &vert);
@@ -135,6 +138,10 @@ void EarthVisualization::addTriangleToMesh(u32 triangle, int level)
 
 void EarthVisualization::generateMesh()
 {
+	if (!m_isMeshGenerated)
+	{
+		return;
+	}
 
 	clear();
 
@@ -304,12 +311,14 @@ void EarthVisualization::setTriangleUnderUs(u32 triangleUnderUs)
 
 void EarthVisualization::paintVertex(u32 vertexId, video::S3DVertex *v)
 {
-	v->Color = m_Material.Wireframe ? video::SColor(255, 0, 255, 0) : video::SColor(255, 200, 200, 200);
+	v->Color = m_Material.Wireframe ? video::SColor(255, 0, 255, 0)
+			: video::SColor(255, 200, 200, 200);
 	for (int i = 0; i < 3; i++)
 	{
 		if (m_vTriangleUnderUsPoints[i] == vertexId)
 		{
-			v->Color = m_Material.Wireframe ? video::SColor(255, 255, 255, 0) : video::SColor(255, 255, 255, 255);
+			v->Color = m_Material.Wireframe ? video::SColor(255, 255, 255, 0)
+					: video::SColor(255, 255, 255, 255);
 			break;
 		}
 	}

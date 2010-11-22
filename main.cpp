@@ -38,7 +38,7 @@ using namespace gui;
 
 enum
 {
-	GUI_ID_SPEED_SCROLL = 101, GUI_ID_LEVEL, GUI_ID_WIREFRAME
+	GUI_ID_SPEED_SCROLL = 101, GUI_ID_LEVEL, GUI_ID_WIREFRAME, GUI_ID_MESH_UPDATE
 };
 
 #define GUI_X 5
@@ -105,6 +105,8 @@ public:
 							= checkBox->isChecked();
 					g_EarthVisualization->getMaterial().setTexture(0,
 							checkBox->isChecked() ? 0 : g_textre);
+				} else if (id == GUI_ID_MESH_UPDATE) {
+					g_EarthVisualization->setMeshGenerated(checkBox->isChecked());
 				}
 			}
 				break;
@@ -202,6 +204,12 @@ int main()
 			+ 95, GUI_Y + 22 + 22 + 20), true);
 	env->addCheckBox(false, rect<s32> (GUI_X + 100, GUI_Y + 22 + 22, GUI_X
 			+ 100 + 200, GUI_Y + 22 + 22 + 20), 0, GUI_ID_WIREFRAME);
+
+	env->addStaticText(L"Update mesh:", rect<s32> (GUI_X, GUI_Y + 22 + 22 + 22, GUI_X
+				+ 95, GUI_Y + 22 + 22 + 22 + 20), true);
+		env->addCheckBox(true, rect<s32> (GUI_X + 100, GUI_Y + 22 + 22 + 22, GUI_X
+				+ 100 + 200, GUI_Y + 22 + 22 + 22 + 20), 0, GUI_ID_MESH_UPDATE);
+
 	SKeyMap keyMap[] =
 	{
 	{ EKA_MOVE_FORWARD, KEY_KEY_W },
