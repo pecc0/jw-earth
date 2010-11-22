@@ -60,7 +60,7 @@ public:
 
 	virtual u32 getMaterialCount();
 
-	virtual video::SMaterial& getMaterial(u32 i);
+	virtual video::SMaterial& getMaterial();
 
 	void generateMesh();
 	const core::vector3df& getViewerPoint() const;

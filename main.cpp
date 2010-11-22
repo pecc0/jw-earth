@@ -38,7 +38,7 @@ using namespace gui;
 
 enum
 {
-	GUI_ID_SPEED_SCROLL = 101, GUI_ID_LEVEL
+	GUI_ID_SPEED_SCROLL = 101, GUI_ID_LEVEL, GUI_ID_WIREFRAME
 };
 
 #define GUI_X 5
@@ -50,6 +50,8 @@ IrrlichtDevice *g_Device;
 JWSceneNodeAnimatorCameraFPS* g_CameraAnimator;
 EarthVisualization* g_EarthVisualization;
 IGUIScrollBar* g_LevelScroll;
+irr::video::ITexture *g_textre;
+
 class MyEventReceiver: public IEventReceiver
 {
 public:
@@ -91,6 +93,18 @@ public:
 				else if (id == GUI_ID_LEVEL)
 				{
 					//g_EarthVisualization->setLevel(pos);
+				}
+			}
+				break;
+			case EGET_CHECKBOX_CHANGED:
+			{
+				IGUICheckBox* checkBox = (IGUICheckBox*) event.GUIEvent.Caller;
+				if (id == GUI_ID_WIREFRAME)
+				{
+					g_EarthVisualization->getMaterial().Wireframe
+							= checkBox->isChecked();
+					g_EarthVisualization->getMaterial().setTexture(0,
+							checkBox->isChecked() ? 0 : g_textre);
 				}
 			}
 				break;
@@ -166,7 +180,6 @@ int main()
 
 	scrollbar->setPos(255);
 
-
 	// add a camera scene node
 	scene::ICameraSceneNode* camera = smgr->addCameraSceneNodeFPS();
 	//scene::ICameraSceneNode* camera = addCameraSceneNodeFPS(smgr);
@@ -185,7 +198,10 @@ int main()
 	scrollbar->setMin(0);
 	scrollbar->setPos(START_LEVEL);
 	g_LevelScroll = scrollbar;
-
+	env->addStaticText(L"Wireframe:", rect<s32> (GUI_X, GUI_Y + 22 + 22, GUI_X
+			+ 95, GUI_Y + 22 + 22 + 20), true);
+	env->addCheckBox(false, rect<s32> (GUI_X + 100, GUI_Y + 22 + 22, GUI_X
+			+ 100 + 200, GUI_Y + 22 + 22 + 20), 0, GUI_ID_WIREFRAME);
 	SKeyMap keyMap[] =
 	{
 	{ EKA_MOVE_FORWARD, KEY_KEY_W },
@@ -195,24 +211,17 @@ int main()
 	{ EKA_JUMP_UP, KEY_SPACE },
 	{ EKA_CROUCH, KEY_LSHIFT } };
 	g_CameraAnimator->setKeyMap(keyMap, 6);
-
 	core::vector3df earthCenter(0, 0, 0);
-
 	camera->setFarValue(500000.f); //500 000 km
 	//camera->setUpVector(core::vector3df(0,0,1));
 	camera->setPosition(core::vector3df(100, 100, -EARTH_RADIUS - 200.));
 	camera->setTarget(earthCenter);
-
 	//camera->setFarValue(20000.f);
-
 	//camera->setPosition(core::vector3df(0,0,-200));
-
 	// Maya cameras reposition themselves relative to their target, so target the location
 	// where the mesh scene node is placed.
 	//camera->setTarget(core::vector3df(0, 0, 0));
-
 	//smgr->addCameraSceneNode(0, core::vector3df(0,-40,0), core::vector3df(0,0,0));
-
 	/*
 	 Create our scene node. I don't check the result of calling new, as it
 	 should throw an exception rather than returning 0 on failure. Because
@@ -224,19 +233,10 @@ int main()
 	 */
 	g_EarthVisualization = new EarthVisualization(smgr->getRootSceneNode(),
 			smgr, 666, START_LEVEL, earthCenter, EARTH_RADIUS);
-
 	g_EarthVisualization->setMaterialType(video::EMT_SOLID);
-
-	g_EarthVisualization->setMaterialTexture(0, driver->getTexture("media/earth.bmp"));
-
-	g_EarthVisualization->setMaterialFlag(video::EMF_LIGHTING, false);
-	g_EarthVisualization->setMaterialFlag(video::EMF_ZBUFFER, false);
-
-
+	g_textre = driver->getTexture("media/earth.bmp");
+	g_EarthVisualization->getMaterial().setTexture(0, g_textre);
 	g_EarthVisualization->setViewerPoint(camera->getPosition());
-
-
-
 	/*
 	 To animate something in this boring scene consisting only of one
 	 tetraeder, and to show that you now can use your scene node like any
@@ -245,14 +245,11 @@ int main()
 	 irr::scene::ISceneManager::createRotationAnimator() could return 0, so
 	 should be checked.
 	 */
-	scene::ISceneNodeAnimator* anim = 0;
+	scene::ISceneNodeAnimator *anim = 0;
 	//smgr->createRotationAnimator(core::vector3df(0.8f, 0, 0.8f));
-
-
 	if (anim)
 	{
 		g_EarthVisualization->addAnimator(anim);
-
 		/*
 		 I'm done referring to anim, so must
 		 irr::IReferenceCounted::drop() this reference now because it
@@ -262,7 +259,6 @@ int main()
 		anim->drop();
 		anim = 0;
 	}
-
 	/*
 	 I'm done with my CSampleSceneNode object, and so must drop my reference.
 	 This won't delete the object, yet, because it is still attached to the
@@ -271,20 +267,14 @@ int main()
 	 */
 	g_EarthVisualization->drop();
 	//myNode = 0; // As I shouldn't refer to it again, ensure that I can't
-
-
-
-	scene::ISceneNode* bill = smgr->addBillboardSceneNode(0, core::dimension2d<
+	scene::ISceneNode *bill = smgr->addBillboardSceneNode(0, core::dimension2d<
 			f32>(600, 600), earthCenter, 113);
 	//600x600 km billboard
-
 	bill->setMaterialFlag(video::EMF_LIGHTING, false);
 	bill->setMaterialFlag(video::EMF_ZWRITE_ENABLE, false);
 	bill->setMaterialType(video::EMT_TRANSPARENT_ADD_COLOR);
 	bill->setMaterialTexture(0, driver->getTexture("media/particlered.bmp"));
-
 	//bill->drop();
-
 	/*
 	 Now draw everything and finish.
 	 */
@@ -292,20 +282,18 @@ int main()
 	while (g_Device->run())
 	{
 		driver->beginScene(true, true, video::SColor(0, 100, 100, 100));
-
 		smgr->drawAll();
-
 		env->drawAll();
-
 		driver->endScene();
 		if (++frames == 100)
 		{
 			core::stringw str = L"Irrlicht Engine [";
 			str += driver->getName();
 			str += L"] FPS: ";
-			str += (s32) driver->getFPS();
+			str += (s32) (driver->getFPS());
 			str += L"] Tile: ";
-			str.printBinary(g_EarthVisualization->getUTriangleUnderUs(), 32, L'0', L'1');
+			str.printBinary(g_EarthVisualization->getUTriangleUnderUs(), 32,
+					L'0', L'1');
 			g_Device->setWindowCaption(str.c_str());
 			frames = 0;
 		}
