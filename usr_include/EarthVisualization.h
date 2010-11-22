@@ -13,6 +13,7 @@
 #include "JWTriangle.h"
 #include "JWSphere.h"
 #include "AutoCleanHashMap.h"
+#include "IJWLogger.h"
 
 using namespace irr;
 using namespace __gnu_cxx;
@@ -23,6 +24,8 @@ using namespace __gnu_cxx;
 
 class EarthVisualization: public irr::scene::ISceneNode
 {
+	jw::IJWLogger* log;
+
 	jw::JWSphere m_Sphere;
 
 	jw::AutoCleanHashMap<video::S3DVertex> m_mapVerteces;

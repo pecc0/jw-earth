@@ -245,6 +245,8 @@ int main()
 	g_textre = driver->getTexture("media/earth.bmp");
 	g_EarthVisualization->getMaterial().setTexture(0, g_textre);
 	g_EarthVisualization->setViewerPoint(camera->getPosition());
+
+
 	/*
 	 To animate something in this boring scene consisting only of one
 	 tetraeder, and to show that you now can use your scene node like any

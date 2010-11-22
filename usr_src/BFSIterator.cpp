@@ -21,35 +21,18 @@ BFSIterator::BFSIterator(JWSphere* sphere, u32 start, int level) :
 {
 	start = JWTriangle::cropToLevel(start, level);
 	m_trQueue.push(start);
-	m_trUsed.insert(start);
+	setUsed(start);
 }
 
 BFSIterator::BFSIterator(BFSIterator * old, int level) :
 	m_sphere(old->m_sphere), m_level(level)
 {
-	set<u32>::iterator i;
-	for (i = old->m_trUsed.begin(); i != old->m_trUsed.end(); ++i)
-	{
-		u32 tr = JWTriangle::cropToLevel(*i, level);
-		m_trUsed.insert(tr);
-	}
 
-	while (!old->m_trQueue.empty())
-	{
-		u32 tr = JWTriangle::cropToLevel(old->m_trQueue.front(), level);
-		old->m_trQueue.pop();
-		if (m_trUsed.find(tr) == m_trUsed.end())
-		{
-			m_trQueue.push(tr);
-			m_trUsed.insert(tr);
-		}
-
-	}
 }
 
 bool BFSIterator::isUsed(u32 tr)
 {
-	return m_trUsed.find(tr) == m_trUsed.end();
+	return m_trUsed.find(tr) != m_trUsed.end();
 }
 
 void BFSIterator::setUsed(u32 tr)
@@ -90,10 +73,10 @@ void BFSIterator::accept(u32 triangle)
 	{
 		u32 neigh = tr->getNeighbour(i);
 
-		if (m_trUsed.find(neigh) == m_trUsed.end())
+		if (!isUsed(neigh))
 		{
 			m_trQueue.push(neigh);
-			m_trUsed.insert(neigh);
+			setUsed(neigh);
 		}
 	}
 }

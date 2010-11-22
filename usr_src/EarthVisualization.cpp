@@ -12,7 +12,8 @@
 EarthVisualization::EarthVisualization(scene::ISceneNode* parent,
 		scene::ISceneManager* mgr, s32 id, int level,
 		const core::vector3df& center, f32 radius) :
-	scene::ISceneNode(parent, mgr, id), m_Sphere(radius), m_nLevel(level),
+	scene::ISceneNode(parent, mgr, id), log(jw::LoggerFactory::getLogger(
+			"com.jw.EarthVisualization")), m_Sphere(radius), m_nLevel(level),
 			m_vrtCenter(center), m_fRadius(radius), m_isMeshGenerated(true)
 {
 
@@ -170,6 +171,7 @@ void EarthVisualization::generateMesh()
 	u32 triangle = m_uTriangleUnderUs;
 	core::vector3df startPt = m_vertViewerPoint;
 	//startPt.setLength(m_fRadius);
+	//log->debug("generation started");
 	bool addingStarted = false;
 	while (m_nTrCount < 2000)
 	{
@@ -177,6 +179,10 @@ void EarthVisualization::generateMesh()
 		core::vector3df* ptrVertPos = m_Sphere.getVertex(vertexId);
 		if (isPointVisibleAtLevel(ptrVertPos->getDistanceFrom(startPt), level))
 		{
+			//if (!addingStarted)
+			//{
+			//	log->debug("addingStarted %d", level);
+			//}
 			addingStarted = true;
 			addTriangleToMesh(triangle, level);
 			i->accept(triangle);
@@ -194,31 +200,38 @@ void EarthVisualization::generateMesh()
 			{
 				break;
 			}
+
 			if (addingStarted)
 			{
-
+				//log->debug("New level %d", level);
 				//i = m_Sphere.bfs(i, level);
 				jw::BFSIterator* newIterator = new jw::BFSIterator(&m_Sphere,
 						level);
 
-				set<u32>::iterator setiter;
-				for (setiter = i->getUsedSet()->begin(); setiter
-						!= i->getUsedSet()->end(); ++setiter)
-				{
-					newIterator->setUsed(JWTriangle::cropToLevel(*setiter,
-							level));
-				}
-
 				//u32 remain = triangle;
 				do
 				{
+					addTriangleToMesh(triangle, level + 1);
+					m_nTrCount++;
+					if (m_nTrCount >= 2000)
+					{
+						break;
+					}
+					i->setUsed(triangle);
+					//core::stringc str;
+					//str.printBinary(triangle, 32, L'0', L'1');
+					//log->debug("++%s", str.c_str());
 					triangle = JWTriangle::cropToLevel(triangle, level);
 					for (int subtr = 0; subtr < 4; subtr++)
 					{
 						u32 childTr = JWTriangle::getChildIndex(triangle,
 								subtr, level);
+						//str = "";
+						//str.printBinary(childTr, 32, L'0', L'1');
 						if (!i->isUsed(childTr))
 						{
+
+							//log->debug(" +%s", str.c_str());
 							addTriangleToMesh(childTr, level + 1);
 							m_nTrCount++;
 							if (m_nTrCount >= 2000)
@@ -226,6 +239,10 @@ void EarthVisualization::generateMesh()
 								break;
 							}
 							i->setUsed(childTr);
+						}
+						else
+						{
+							//log->debug(" -%s", str.c_str());
 						}
 					}
 					if (m_nTrCount >= 2000)
@@ -240,6 +257,14 @@ void EarthVisualization::generateMesh()
 					}
 
 				} while (i->next(&triangle));
+
+				set<u32>::iterator setiter;
+				for (setiter = i->getUsedSet()->begin(); setiter
+						!= i->getUsedSet()->end(); ++setiter)
+				{
+					newIterator->setUsed(JWTriangle::cropToLevel(*setiter,
+							level));
+				}
 
 				i->drop();
 				i = newIterator;
