@@ -125,14 +125,28 @@ void EarthVisualization::addTriangleToMesh(u32 triangle, int level)
 					video::SColor(255, 200, 200, 200), getSphericalCoordinates(
 							*ptrVertPos));
 			vert.Normal.normalize();
-			paintVertex(vertexId, &vert);
+			//paintVertex(vertexId, &vert);
 			m_mapVerteces.put(vertexId, &vert);
+			//log->debug("%f,%f", vert.TCoords.X, vert.TCoords.Y);
 		}
-		else
+		video::S3DVertex* v = m_mapVerteces.getPtrPool() + hash;
+		if (v->TCoords.X == 0.5 && !(triangle & 0b11))
 		{
-			video::S3DVertex* v = m_mapVerteces.getPtrPool() + hash;
-			paintVertex(vertexId, v);
+			//The border case - the X Tcoordinate of some of the other triangle points is negative.
+			//Will add the same point but with X Tcoordinate = -0.5, so set the first bit (which is not used) of the ID
+			vertexId |= 0x80000000;
+			hash = m_mapVerteces.hash(vertexId);
+			if (m_mapVerteces.getPtrKeys()[hash] == EMPTY_KEY)
+			{
+				m_mapVerteces.put(vertexId, v);
+			}
+			v = m_mapVerteces.getPtrPool() + hash;
+			v->TCoords.X = -0.5;
+			//remove the first bit to work for painting
+			vertexId &= 0x7FFFFFFF;
 		}
+		paintVertex(vertexId, v);
+
 		m_vIndices[m_nCurrentIndex++] = hash;
 	}
 }
