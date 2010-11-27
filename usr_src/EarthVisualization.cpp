@@ -193,10 +193,11 @@ void EarthVisualization::generateMesh()
 		core::vector3df* ptrVertPos = m_Sphere.getVertex(vertexId);
 		if (isPointVisibleAtLevel(ptrVertPos->getDistanceFrom(startPt), level))
 		{
-			//if (!addingStarted)
-			//{
-			//	log->debug("addingStarted %d", level);
-			//}
+			if (!addingStarted)
+			{
+				m_nLevel = level;
+				//log->debug("addingStarted %d", level);
+			}
 			addingStarted = true;
 			addTriangleToMesh(triangle, level);
 			i->accept(triangle);
@@ -288,7 +289,6 @@ void EarthVisualization::generateMesh()
 				triangle = JWTriangle::cropToLevel(triangle, level);
 				i->drop();
 				i = m_Sphere.bfs(triangle, level);
-				m_nLevel = level;
 			}
 		}
 	}
