@@ -22,6 +22,7 @@ CPPUNIT_TEST_SUITE( TestAutoCleanHashMap );
 		CPPUNIT_TEST( testBackwardIteration );
 		CPPUNIT_TEST( testFreeSpace );
 		CPPUNIT_TEST( testAutoFreeSpace );
+		CPPUNIT_TEST( testAutoFree15000 );
 	CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -140,14 +141,28 @@ public:
 		CPPUNIT_ASSERT_EQUAL((int*)NULL, hm.get(9));
 
 	}
+
+	void testAutoFree15000()
+	{
+		AutoCleanHashMap<int> hm(150013);
+		hm.init();
+#define BORDER 120011
+		for (int i = 0; i <= BORDER; i++)
+		{
+			hm.put(i, -i);
+		}
+		CPPUNIT_ASSERT(hm.get(BORDER));
+		CPPUNIT_ASSERT(hm.get(BORDER - 1));
+		CPPUNIT_ASSERT(hm.get(BORDER - 2));
+		CPPUNIT_ASSERT(hm.get(BORDER - 3));
+	}
 };
 CPPUNIT_TEST_SUITE_REGISTRATION( TestAutoCleanHashMap );
 
 int main()
 {
-	//TestAutoCleanHashMap test;
-	//test.testAutoFreeSpace();
-
+	TestAutoCleanHashMap test;
+	test.testAutoFree15000();
 	CPPUNIT_NS::TestResult testResult;
 	CPPUNIT_NS::TestResultCollector testsCollector;
 	testResult.addListener(&testsCollector);

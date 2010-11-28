@@ -130,12 +130,19 @@ JWTriangle* jw::JWSphere::getTriangle(u32 key, int level)
 	{
 		u32 parent = JWTriangle::getParentTriangle(key, level);
 		divideTriangle(parent, level - 1);
-		return trianglesMap.get(key);
+		result = trianglesMap.get(key);
 	}
-	else
+	if (result == NULL)
 	{
-		return result;
+		//log->debug("BUG");
+		//We obviously just deleted the triangle :) - divide again
+		u32 parent = JWTriangle::getParentTriangle(key, level);
+		divideTriangle(parent, level - 1);
+		result = trianglesMap.get(key);
 	}
+
+	return result;
+
 }
 
 u32 jw::JWSphere::getTriangleVertex(u32 triangle, int level, int i,
