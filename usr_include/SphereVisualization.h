@@ -22,7 +22,7 @@ using namespace __gnu_cxx;
 #pragma comment(lib, "Irrlicht.lib")
 #endif
 
-class EarthVisualization: public irr::scene::ISceneNode
+class SphereVisualization: public irr::scene::ISceneNode
 {
 	jw::IJWLogger* log;
 
@@ -54,11 +54,11 @@ class EarthVisualization: public irr::scene::ISceneNode
 	void clear();
 	void addTriangleToMesh(u32 triangle, int level);
 public:
-	EarthVisualization(scene::ISceneNode *parent = 0,
+	SphereVisualization(scene::ISceneNode *parent = 0,
 			scene::ISceneManager *mgr = 0, s32 id = 0, int level = 2,
 			const core::vector3df& center = core::vector3df(0.0f, 0.0f, 0.0f),
 			f32 radius = 12742.);
-	virtual ~EarthVisualization();
+	virtual ~SphereVisualization();
 	virtual void OnRegisterSceneNode();
 	virtual void render();
 	const virtual core::aabbox3d<f32>& getBoundingBox() const;

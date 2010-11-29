@@ -5,11 +5,11 @@
  *      Author: Petko
  */
 
-#include "EarthVisualization.h"
+#include "SphereVisualization.h"
 #include <cmath>
 #include "irrMath.h"
 
-EarthVisualization::EarthVisualization(scene::ISceneNode* parent,
+SphereVisualization::SphereVisualization(scene::ISceneNode* parent,
 		scene::ISceneManager* mgr, s32 id, int level,
 		const core::vector3df& center, f32 radius) :
 	scene::ISceneNode(parent, mgr, id), log(jw::LoggerFactory::getLogger(
@@ -45,7 +45,7 @@ EarthVisualization::EarthVisualization(scene::ISceneNode* parent,
 	}
 }
 
-void EarthVisualization::init()
+void SphereVisualization::init()
 {
 	m_vIndices = 0;
 	//m_nLevel = 14;
@@ -56,17 +56,17 @@ void EarthVisualization::init()
 	//generateMesh();
 }
 
-void EarthVisualization::clear()
+void SphereVisualization::clear()
 {
 	delete[] m_vIndices;
 }
 
-EarthVisualization::~EarthVisualization()
+SphereVisualization::~SphereVisualization()
 {
 	clear();
 }
 
-void EarthVisualization::OnRegisterSceneNode()
+void SphereVisualization::OnRegisterSceneNode()
 {
 	if (IsVisible)
 		SceneManager->registerNodeForRendering(this);
@@ -76,7 +76,7 @@ void EarthVisualization::OnRegisterSceneNode()
 
 u32 g_TrianglesBuf[3000];
 
-void EarthVisualization::render()
+void SphereVisualization::render()
 {
 	video::IVideoDriver* driver = SceneManager->getVideoDriver();
 
@@ -89,29 +89,29 @@ void EarthVisualization::render()
 
 }
 
-const core::aabbox3d<f32>& EarthVisualization::getBoundingBox() const
+const core::aabbox3d<f32>& SphereVisualization::getBoundingBox() const
 {
 	return m_Box;
 }
 
-u32 EarthVisualization::getMaterialCount()
+u32 SphereVisualization::getMaterialCount()
 {
 	return 1;
 }
 
-video::SMaterial& EarthVisualization::getMaterial()
+video::SMaterial& SphereVisualization::getMaterial()
 {
 	return m_Material;
 }
 
-const core::vector2d<f32> EarthVisualization::getSphericalCoordinates(
+const core::vector2d<f32> SphereVisualization::getSphericalCoordinates(
 		const core::vector3df& v) const
 {
 	return core::vector2d<f32>(atan2(v.Z, v.X) / (core::PI * 2), acos(v.Y
 			/ m_fRadius) / (core::PI));
 }
 
-void EarthVisualization::addTriangleToMesh(u32 triangle, int level)
+void SphereVisualization::addTriangleToMesh(u32 triangle, int level)
 {
 	for (int j = 2; j >= 0; --j)
 	{
@@ -151,7 +151,7 @@ void EarthVisualization::addTriangleToMesh(u32 triangle, int level)
 	}
 }
 
-void EarthVisualization::generateMesh()
+void SphereVisualization::generateMesh()
 {
 	if (!m_isMeshGenerated)
 	{
@@ -296,17 +296,17 @@ void EarthVisualization::generateMesh()
 	i->drop();
 }
 
-const core::vector3df& EarthVisualization::getViewerPoint() const
+const core::vector3df& SphereVisualization::getViewerPoint() const
 {
 	return m_vertViewerPoint;
 }
 
-bool EarthVisualization::isPointVisibleAtLevel(f32 distance, int level)
+bool SphereVisualization::isPointVisibleAtLevel(f32 distance, int level)
 {
 	return distance < 200000 >> level;
 }
 
-void EarthVisualization::setViewerPoint(const core::vector3df& viewerPoint)
+void SphereVisualization::setViewerPoint(const core::vector3df& viewerPoint)
 {
 	this->m_vertViewerPoint = viewerPoint - m_vrtCenter; //translate to sphere coordinates - center is at 0,0,0
 
@@ -338,17 +338,17 @@ void EarthVisualization::setViewerPoint(const core::vector3df& viewerPoint)
 
 }
 
-u32 EarthVisualization::getUTriangleUnderUs() const
+u32 SphereVisualization::getUTriangleUnderUs() const
 {
 	return m_uTriangleUnderUs;
 }
 
-void EarthVisualization::setTriangleUnderUs(u32 triangleUnderUs)
+void SphereVisualization::setTriangleUnderUs(u32 triangleUnderUs)
 {
 	m_uTriangleUnderUs = triangleUnderUs;
 }
 
-void EarthVisualization::paintVertex(u32 vertexId, video::S3DVertex *v)
+void SphereVisualization::paintVertex(u32 vertexId, video::S3DVertex *v)
 {
 	v->Color = m_Material.Wireframe ? video::SColor(255, 0, 255, 0)
 			: video::SColor(255, 200, 200, 200);
@@ -363,12 +363,12 @@ void EarthVisualization::paintVertex(u32 vertexId, video::S3DVertex *v)
 	}
 }
 
-int EarthVisualization::getLevel() const
+int SphereVisualization::getLevel() const
 {
 	return m_nLevel;
 }
 
-void EarthVisualization::setLevel(int level)
+void SphereVisualization::setLevel(int level)
 {
 	this->m_nLevel = level;
 	m_uTriangleUnderUs = JWTriangle::cropToLevel(m_uTriangleUnderUs, level);

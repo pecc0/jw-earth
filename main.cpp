@@ -21,7 +21,7 @@
  */
 #include <irrlicht.h>
 //#include "driverChoice.h"
-#include "EarthVisualization.h"
+#include "SphereVisualization.h"
 #include "irrlitch/JWSceneNodeAnimatorCameraFPS.h"
 #include "sstream"
 #include "iomanip"
@@ -48,7 +48,7 @@ enum
 
 IrrlichtDevice *g_Device;
 JWSceneNodeAnimatorCameraFPS* g_CameraAnimator;
-EarthVisualization* g_EarthVisualization;
+SphereVisualization* g_EarthVisualization;
 IGUIScrollBar* g_LevelScroll;
 irr::video::ITexture *g_textre;
 
@@ -239,7 +239,7 @@ int main()
 	 to drop it only *after* I have finished using it, regardless of what
 	 the reference count of the object is after creation.
 	 */
-	g_EarthVisualization = new EarthVisualization(smgr->getRootSceneNode(),
+	g_EarthVisualization = new SphereVisualization(smgr->getRootSceneNode(),
 			smgr, 666, START_LEVEL, earthCenter, EARTH_RADIUS);
 	g_EarthVisualization->setMaterialType(video::EMT_SOLID);
 	g_textre = driver->getTexture("media/earth.bmp");
