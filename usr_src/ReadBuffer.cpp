@@ -21,7 +21,7 @@ ReadBuffer::~ReadBuffer()
 s32 ReadBuffer::read(void *buffer, u32 sizeToRead)
 {
 	sizeToRead = core::min_(m_Size - m_Position, sizeToRead);
-	memcpy(buffer, m_ptrBuffer + m_Position, sizeToRead);
+	memcpy(buffer, ((char*) m_ptrBuffer) + m_Position, sizeToRead);
 	return sizeToRead;
 }
 
