@@ -8,11 +8,13 @@
 #ifndef JWTEXTUREPROVIDER_H_
 #define JWTEXTUREPROVIDER_H_
 
-class JWTextureProvider
+class GoogleTextureProvider
 {
 public:
-	JWTextureProvider();
-	virtual ~JWTextureProvider();
+	GoogleTextureProvider(const io::path& baseTexture);
+	virtual ~GoogleTextureProvider();
+
+	irr::core::io::IReadFile& getTexture(core::vector2d<f32>& ceterCoordinates, );
 };
 
 #endif /* JWTEXTUREPROVIDER_H_ */

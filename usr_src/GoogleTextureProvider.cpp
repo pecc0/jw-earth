@@ -5,15 +5,17 @@
  *      Author: PetkoLtd
  */
 
-#include "JWTextureProvider.h"
+#include "GoogleTextureProvider.h"
 
-JWTextureProvider::JWTextureProvider()
+GoogleTextureProvider::GoogleTextureProvider(const io::path& baseTexture)
 {
 	// TODO Auto-generated constructor stub
 
 }
 
-JWTextureProvider::~JWTextureProvider()
+GoogleTextureProvider::~GoogleTextureProvider()
 {
 	// TODO Auto-generated destructor stub
 }
+
+
