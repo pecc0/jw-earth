@@ -1,3 +1,4 @@
+/* AUTORIGHTS */
 /*
  * JWTextureProvider.cpp
  *

@@ -1,3 +1,4 @@
+/* AUTORIGHTS */
 /** Example 003 Custom SceneNode
 
  This Tutorial is more advanced than the previous ones.

@@ -1,3 +1,4 @@
+/* AUTORIGHTS */
 /*
  * DecapsulatedHashtable.h
  *
