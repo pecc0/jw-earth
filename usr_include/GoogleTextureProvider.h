@@ -11,10 +11,12 @@
 class GoogleTextureProvider
 {
 public:
-	GoogleTextureProvider(const io::path& baseTexture);
+	/*
+	GoogleTextureProvider(const irr::core::io::path& baseTexture);
 	virtual ~GoogleTextureProvider();
 
 	irr::core::io::IReadFile& getTexture(core::vector2d<f32>& ceterCoordinates, );
+	*/
 };
 
 #endif /* JWTEXTUREPROVIDER_H_ */
