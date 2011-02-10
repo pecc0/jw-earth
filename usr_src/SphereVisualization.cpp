@@ -243,6 +243,14 @@ void SphereVisualization::generateMesh()
 						level);
 
 				//u32 remain = triangle;
+				set<u32>::iterator setiter;
+				for (setiter = i->getUsedSet()->begin(); setiter
+						!= i->getUsedSet()->end(); ++setiter)
+				{
+					newIterator->setUsed(JWTriangle::cropToLevel(*setiter,
+							level));
+				}
+
 				do
 				{
 					addTriangleToMesh(triangle, level + 1);
@@ -284,21 +292,15 @@ void SphereVisualization::generateMesh()
 						break;
 					}
 
-					if (!newIterator->isUsed(triangle))
-					{
-						newIterator->setUsed(triangle);
-						newIterator->accept(triangle);
-					}
+					//if (!newIterator->isUsed(triangle))
+					//{
+					//	newIterator->setUsed(triangle);
+					newIterator->accept(triangle);
+					//}
 
 				} while (i->next(&triangle));
 
-				set<u32>::iterator setiter;
-				for (setiter = i->getUsedSet()->begin(); setiter
-						!= i->getUsedSet()->end(); ++setiter)
-				{
-					newIterator->setUsed(JWTriangle::cropToLevel(*setiter,
-							level));
-				}
+
 
 				i->drop();
 				i = newIterator;
