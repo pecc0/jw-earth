@@ -48,14 +48,21 @@ CImg<pixelFormat> *GoogleTilesLoader::loadTile(int x, int y, int z)
 		//download
 		std::ostringstream url;
 		//TODO url in parameter
-		url << "http://khm0.google.com/kh/v=78&" << coordinatesStr << "&s=Galileo.jpg";
+		url << "http://khm0.google.com/kh/v=78&" << coordinatesStr
+				<< "&s=Galileo.jpg";
 
 		CURL *curl;
 		CURLcode res;
 		curl = curl_easy_init();
 		if (curl)
 		{
+			struct curl_slist *chunk = NULL;
+
+			chunk = curl_slist_append(chunk, "User-Agent: 	Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.2.13) Gecko/20101203 Firefox/3.6.13");
+
 			curl_easy_setopt(curl, CURLOPT_URL, url.str().c_str());
+			curl_easy_setopt(curl, CURLOPT_HTTPHEADER, chunk);
+
 			res = curl_easy_perform(curl);
 
 			/* always cleanup */
