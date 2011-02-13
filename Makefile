@@ -25,7 +25,7 @@ USERLDFLAGS =
 #no changes necessary below this line
 ####
 
-CPPFLAGS = -I$(IrrlichtHome)/include -I$(IrrlichtHome)/include/Win32 -I/usr/X11R6/include $(USERCPPFLAGS)
+CPPFLAGS = -I$(IrrlichtHome)/include -I$(IrrlichtHome)/include/Win32 -I$(IrrlichtHome)/curl-7.21.3/include -I/usr/X11R6/include $(USERCPPFLAGS)
 CXXFLAGS = $(USERCXXFLAGS)
 LDFLAGS = $(USERLDFLAGS)
 

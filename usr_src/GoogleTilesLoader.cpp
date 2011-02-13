@@ -7,6 +7,12 @@
 
 #include "GoogleTilesLoader.h"
 #include <sstream>
+#include <iostream>
+#include <fstream>
+#define CURL_STATICLIB
+#include "curl/curl.h"
+
+using namespace std;
 
 GoogleTilesLoader::GoogleTilesLoader() :
 	m_sTmpDir("downloaded")
@@ -26,11 +32,38 @@ GoogleTilesLoader::~GoogleTilesLoader()
 
 CImg<pixelFormat> *GoogleTilesLoader::loadTile(int x, int y, int z)
 {
-	std::ostringstream params;
-	params << "v=78&x=" << x << "&y=" << y << "&z=" << z
-			<< "&s=Galileo.jpg";
-	std::ostringstream cacheFile;
-	cacheFile<<m_sTmpDir<<"\\"<<params.str();
-	return new CImg<pixelFormat> (cacheFile.str().c_str());
+	std::ostringstream coordinatesStr;
+	coordinatesStr << "x=" << x << "&y=" << y << "&z=" << z;
+
+	std::ostringstream cacheFileStream;
+	cacheFileStream << m_sTmpDir << "\\" << coordinatesStr.str();
+
+	string cacheFileStr(cacheFileStream.str());
+
+	const char* filename = cacheFileStr.c_str();
+	ifstream cacheFile(filename);
+
+	if (!cacheFile)
+	{
+		//download
+		std::ostringstream params;
+		params << "v=78&" << coordinatesStr << "&s=Galileo.jpg";
+
+		CURL *curl;
+		CURLcode res;
+		curl = curl_easy_init();
+		if (curl)
+		{
+			curl_easy_setopt(curl, CURLOPT_URL, "http://example.com");
+			res = curl_easy_perform(curl);
+
+			/* always cleanup */
+			curl_easy_cleanup(curl);
+		}
+		return 0;
+
+	}
+
+	return new CImg<pixelFormat> (cacheFileStr.c_str());
 }
 

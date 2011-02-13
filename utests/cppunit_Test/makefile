@@ -14,7 +14,7 @@ BinPath = ../../bin/$(SYSTEM)
 
 # general compiler settings (might need to be set when compiling the lib, too)
 # preprocessor flags, e.g. defines and include paths
-USERCPPFLAGS = -I../../usr_include -I/usr/include -I../include
+USERCPPFLAGS = -I../../usr_include -I/usr/include -I../include -I../../curl-7.21.3/include 
 # compiler flags such as optimization flags
 #USERCXXFLAGS = -O3 -ffast-math
 USERCXXFLAGS = -g -Wall
@@ -47,7 +47,7 @@ all_linux clean_linux: SYSTEM=Linux
 all_win32 clean_win32 static_win32: SYSTEM=Win32-gcc
 all_win32 clean_win32 static_win32: SUF=.exe
 static_win32: CPPFLAGS += -D_IRR_STATIC_LIB_
-all_win32: LDFLAGS += -lopengl32 -lm -lgdi32 -ljpeg
+all_win32: LDFLAGS += -lopengl32 -lm -lgdi32 -ljpeg -lcurl -lws2_32 -lwldap32
 static_win32: LDFLAGS += -lwinspool -lcomdlg32 -lole32 -loleaut32 -luuid -lodbc32 -lodbccp32 -lopengl32
 # name of the binary - only valid for targets which set SYSTEM
 DESTPATH = $(BinPath)/$(Target)$(SUF)
