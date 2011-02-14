@@ -69,12 +69,16 @@ class SphereVisualization: public irr::scene::ISceneNode
 
 	bool m_isMeshGenerated;
 
+	irr::video::ITexture * m_Texture;
+
+	video::IVideoDriver* m_Driver;
+
 	void init();
 	void clear();
 	void addTriangleToMesh(u32 triangle, int level);
 public:
 	SphereVisualization(scene::ISceneNode *parent = 0,
-			scene::ISceneManager *mgr = 0, s32 id = 0, int level = 2,
+			scene::ISceneManager *mgr = 0, video::IVideoDriver* driver = 0, s32 id = 0, int level = 2,
 			const core::vector3df& center = core::vector3df(0.0f, 0.0f, 0.0f),
 			f32 radius = 12742.);
 	virtual ~SphereVisualization();
@@ -106,6 +110,10 @@ public:
 	 *	http://www.euclideanspace.com/maths/geometry/space/coordinates/polar/spherical/index.htm
 	 */
 	const core::vector2d<f32> getSphericalCoordinates(const core::vector3df& v) const;
+
+	void setWireframe(bool wireFrame);
+
+	void reloadTexture();
 };
 
 #endif /* EARTHVIS_H_ */

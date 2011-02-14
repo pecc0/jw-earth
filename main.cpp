@@ -1,22 +1,22 @@
 /* AUTORIGHTS
-Copyright (C) 2010,2011 Petko Petkov (petkodp@gmail.com
-      
-This file is part of JWorld.
+ Copyright (C) 2010,2011 Petko Petkov (petkodp@gmail.com
 
-JWorld is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2, or (at your option)
-any later version.
+ This file is part of JWorld.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+ JWorld is free software; you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation; either version 2, or (at your option)
+ any later version.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software Foundation,
-Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
-*/
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with this program; if not, write to the Free Software Foundation,
+ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ */
 /** Example 003 Custom SceneNode
 
  This Tutorial is more advanced than the previous ones.
@@ -57,7 +57,10 @@ using namespace gui;
 
 enum
 {
-	GUI_ID_SPEED_SCROLL = 101, GUI_ID_LEVEL, GUI_ID_WIREFRAME, GUI_ID_MESH_UPDATE
+	GUI_ID_SPEED_SCROLL = 101,
+	GUI_ID_LEVEL,
+	GUI_ID_WIREFRAME,
+	GUI_ID_MESH_UPDATE
 };
 
 #define GUI_X 5
@@ -69,7 +72,6 @@ IrrlichtDevice *g_Device;
 JWSceneNodeAnimatorCameraFPS* g_CameraAnimator;
 SphereVisualization* g_EarthVisualization;
 IGUIScrollBar* g_LevelScroll;
-irr::video::ITexture *g_textre;
 
 class MyEventReceiver: public IEventReceiver
 {
@@ -120,12 +122,12 @@ public:
 				IGUICheckBox* checkBox = (IGUICheckBox*) event.GUIEvent.Caller;
 				if (id == GUI_ID_WIREFRAME)
 				{
-					g_EarthVisualization->getMaterial().Wireframe
-							= checkBox->isChecked();
-					g_EarthVisualization->getMaterial().setTexture(0,
-							checkBox->isChecked() ? 0 : g_textre);
-				} else if (id == GUI_ID_MESH_UPDATE) {
-					g_EarthVisualization->setMeshGenerated(checkBox->isChecked());
+					g_EarthVisualization->setWireframe(checkBox->isChecked());
+				}
+				else if (id == GUI_ID_MESH_UPDATE)
+				{
+					g_EarthVisualization->setMeshGenerated(
+							checkBox->isChecked());
 				}
 			}
 				break;
@@ -224,10 +226,10 @@ int main()
 	env->addCheckBox(false, rect<s32> (GUI_X + 100, GUI_Y + 22 + 22, GUI_X
 			+ 100 + 200, GUI_Y + 22 + 22 + 20), 0, GUI_ID_WIREFRAME);
 
-	env->addStaticText(L"Update mesh:", rect<s32> (GUI_X, GUI_Y + 22 + 22 + 22, GUI_X
-				+ 95, GUI_Y + 22 + 22 + 22 + 20), true);
-		env->addCheckBox(true, rect<s32> (GUI_X + 100, GUI_Y + 22 + 22 + 22, GUI_X
-				+ 100 + 200, GUI_Y + 22 + 22 + 22 + 20), 0, GUI_ID_MESH_UPDATE);
+	env->addStaticText(L"Update mesh:", rect<s32> (GUI_X, GUI_Y + 22 + 22 + 22,
+			GUI_X + 95, GUI_Y + 22 + 22 + 22 + 20), true);
+	env->addCheckBox(true, rect<s32> (GUI_X + 100, GUI_Y + 22 + 22 + 22, GUI_X
+			+ 100 + 200, GUI_Y + 22 + 22 + 22 + 20), 0, GUI_ID_MESH_UPDATE);
 
 	SKeyMap keyMap[] =
 	{
@@ -259,12 +261,11 @@ int main()
 	 the reference count of the object is after creation.
 	 */
 	g_EarthVisualization = new SphereVisualization(smgr->getRootSceneNode(),
-			smgr, 666, START_LEVEL, earthCenter, EARTH_RADIUS);
+			smgr, driver, 666, START_LEVEL, earthCenter, EARTH_RADIUS);
 	g_EarthVisualization->setMaterialType(video::EMT_SOLID);
-	g_textre = driver->getTexture("media/earth.bmp");
-	g_EarthVisualization->getMaterial().setTexture(0, g_textre);
+	//g_textre = driver->getTexture("media/earth.bmp");
+	//g_EarthVisualization->getMaterial().setTexture(0, g_textre);
 	g_EarthVisualization->setViewerPoint(camera->getPosition());
-
 
 	/*
 	 To animate something in this boring scene consisting only of one

@@ -27,15 +27,18 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #ifndef JWTEXTUREPROVIDER_H_
 #define JWTEXTUREPROVIDER_H_
 
+#include  "irrlicht.h"
+
+using namespace irr;
+
 class GoogleTextureProvider
 {
 public:
-	/*
-	GoogleTextureProvider(const irr::core::io::path& baseTexture);
+
 	virtual ~GoogleTextureProvider();
 
-	irr::core::io::IReadFile& getTexture(core::vector2d<f32>& ceterCoordinates, );
-	*/
+	io::IReadFile* getTexture(core::vector2d<f32>& ceterCoordinates);
+
 };
 
 #endif /* JWTEXTUREPROVIDER_H_ */

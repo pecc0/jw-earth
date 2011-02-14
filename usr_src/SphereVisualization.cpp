@@ -1,22 +1,22 @@
 /* AUTORIGHTS
-Copyright (C) 2010,2011 Petko Petkov (petkodp@gmail.com
-      
-This file is part of JWorld.
+ Copyright (C) 2010,2011 Petko Petkov (petkodp@gmail.com
 
-JWorld is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2, or (at your option)
-any later version.
+ This file is part of JWorld.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+ JWorld is free software; you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation; either version 2, or (at your option)
+ any later version.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software Foundation,
-Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
-*/
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with this program; if not, write to the Free Software Foundation,
+ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ */
 /*
  * JWSphere.cpp
  *
@@ -25,15 +25,17 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
 #include "SphereVisualization.h"
+#include "GoogleTextureProvider.h"
 #include <cmath>
 #include "irrMath.h"
 
 SphereVisualization::SphereVisualization(scene::ISceneNode* parent,
-		scene::ISceneManager* mgr, s32 id, int level,
-		const core::vector3df& center, f32 radius) :
+		scene::ISceneManager* mgr, video::IVideoDriver* driver, s32 id,
+		int level, const core::vector3df& center, f32 radius) :
 	scene::ISceneNode(parent, mgr, id), log(jw::LoggerFactory::getLogger(
 			"com.jw.EarthVisualization")), m_Sphere(radius), m_nLevel(level),
-			m_vrtCenter(center), m_fRadius(radius), m_isMeshGenerated(true)
+			m_vrtCenter(center), m_fRadius(radius), m_isMeshGenerated(true),
+			m_Driver(driver), m_Texture(0)
 {
 
 	m_Material.Wireframe = false;
@@ -300,8 +302,6 @@ void SphereVisualization::generateMesh()
 
 				} while (i->next(&triangle));
 
-
-
 				i->drop();
 				i = newIterator;
 			}
@@ -355,6 +355,7 @@ void SphereVisualization::setViewerPoint(const core::vector3df& viewerPoint)
 					m_uTriangleUnderUs, level, i, false);
 		}
 		generateMesh();
+		reloadTexture();
 	}
 
 }
@@ -394,5 +395,23 @@ void SphereVisualization::setLevel(int level)
 	this->m_nLevel = level;
 	m_uTriangleUnderUs = JWTriangle::cropToLevel(m_uTriangleUnderUs, level);
 	generateMesh();
+	reloadTexture();
 }
 
+void SphereVisualization::setWireframe(bool wireFrame)
+{
+	getMaterial().Wireframe = wireFrame;
+	getMaterial().setTexture(0, wireFrame ? 0 : m_Texture);
+}
+
+void SphereVisualization::reloadTexture()
+{
+	GoogleTextureProvider provider;
+	if (m_Texture)
+	{
+		m_Texture->drop();
+	}
+	m_Texture = m_Driver->getTexture("media/earth.bmp");
+	getMaterial().setTexture(0, m_Texture);
+	//provider.
+}
