@@ -33,6 +33,6 @@ GoogleTextureProvider::~GoogleTextureProvider()
 
 io::IReadFile* GoogleTextureProvider::getTexture(core::vector2d<f32>& ceterCoordinates)
 {
-
+	return 0;
 }
 

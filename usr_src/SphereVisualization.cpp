@@ -35,7 +35,7 @@ SphereVisualization::SphereVisualization(scene::ISceneNode* parent,
 	scene::ISceneNode(parent, mgr, id), log(jw::LoggerFactory::getLogger(
 			"com.jw.EarthVisualization")), m_Sphere(radius), m_nLevel(level),
 			m_vrtCenter(center), m_fRadius(radius), m_isMeshGenerated(true),
-			m_Driver(driver), m_Texture(0)
+			m_Texture(0), m_Driver(driver)
 {
 
 	m_Material.Wireframe = false;
@@ -407,9 +407,11 @@ void SphereVisualization::setWireframe(bool wireFrame)
 void SphereVisualization::reloadTexture()
 {
 	GoogleTextureProvider provider;
+
 	if (m_Texture)
 	{
-		m_Texture->drop();
+		m_Driver->removeTexture(m_Texture);
+		//m_Texture->drop();
 	}
 	m_Texture = m_Driver->getTexture("media/earth.bmp");
 	getMaterial().setTexture(0, m_Texture);
