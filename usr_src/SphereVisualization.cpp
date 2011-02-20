@@ -448,3 +448,8 @@ void SphereVisualization::reloadTexture()
 	getMaterial().setTexture(0, m_Texture);
 	//provider.
 }
+
+void SphereVisualization::receiveTexture(io::IReadFile* sourceFile)
+{
+
+}

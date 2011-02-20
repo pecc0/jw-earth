@@ -28,11 +28,15 @@
 
 GoogleTextureProvider::~GoogleTextureProvider()
 {
-	// TODO Auto-generated destructor stub
 }
 
-io::IReadFile* GoogleTextureProvider::getTexture(core::vector2d<f32>& ceterCoordinates)
+void GoogleTextureProvider::getTexture(core::vector2d<f32>& ceterCoordinates)
 {
-	return 0;
+}
+
+void GoogleTextureProvider::setTextureReceiver(
+		ITextureReceiver *textureReceiver)
+{
+	m_TextureReceiver = textureReceiver;
 }
 

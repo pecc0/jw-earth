@@ -33,6 +33,7 @@
 #include "JWSphere.h"
 #include "AutoCleanHashMap.h"
 #include "IJWLogger.h"
+#include "GoogleTextureProvider.h"
 
 using namespace irr;
 using namespace __gnu_cxx;
@@ -45,7 +46,7 @@ using namespace __gnu_cxx;
 #define STATIC_LEVEL_ID 0
 #define LEVEL_TO_ID(l) (l < FIRST_DYNAMIC_LEVEL ? STATIC_LEVEL_ID : l)
 
-class SphereVisualization: public irr::scene::ISceneNode
+class SphereVisualization: public irr::scene::ISceneNode, virtual ITextureReceiver
 {
 	jw::IJWLogger* log;
 
@@ -122,6 +123,8 @@ public:
 	void setWireframe(bool wireFrame);
 
 	void reloadTexture();
+
+	virtual void receiveTexture(io::IReadFile* sourceFile);
 
 	int getTrCount(int level)
 	{
