@@ -41,8 +41,14 @@ SphereVisualization::SphereVisualization(scene::ISceneNode* parent,
 	getMaterial().Wireframe = false;
 	getMaterial().Lighting = false;
 
-	m_mapVerteces = jw::AutoCleanHashMap<video::S3DVertex>(10000);
-	m_mapVerteces.init();
+	m_mapVerteces[0] = jw::AutoCleanHashMap<video::S3DVertex>(10000);
+	m_mapVerteces[0].init();
+
+	for (int i = FIRST_DYNAMIC_LEVEL; i <= MAX_TRIANGLE_LEVELS; i++)
+	{
+		m_mapVerteces[i] = jw::AutoCleanHashMap<video::S3DVertex>(4000);
+		m_mapVerteces[i].init();
+	}
 
 	init();
 
@@ -68,7 +74,10 @@ SphereVisualization::SphereVisualization(scene::ISceneNode* parent,
 
 void SphereVisualization::init()
 {
-	m_vIndices = 0;
+	for (int i = 0; i <= MAX_TRIANGLE_LEVELS; i++)
+	{
+		m_vIndices[i] = 0;
+	}
 	//m_nLevel = 14;
 	m_uTriangleUnderUs = 1;
 	setTriangleUnderUs(JWTriangle::cropToLevel(
@@ -79,8 +88,12 @@ void SphereVisualization::init()
 
 void SphereVisualization::clear()
 {
-	delete[] m_vIndices;
-	m_vIndices = 0;
+	for (int i = 0; i <= MAX_TRIANGLE_LEVELS; i++)
+	{
+		delete[] m_vIndices[i];
+		m_vIndices[i] = 0;
+	}
+
 }
 
 SphereVisualization::~SphereVisualization()
@@ -105,10 +118,18 @@ void SphereVisualization::render()
 	driver->setMaterial(getMaterial());
 	driver->setTransform(video::ETS_WORLD, AbsoluteTransformation);
 
-	driver->drawVertexPrimitiveList(getCerticesMap()->getPtrPool(),
-			getCerticesMap()->capacity(), getIndices(), getTrCount(),
-			video::EVT_STANDARD, scene::EPT_TRIANGLES, video::EIT_32BIT);
-
+	driver->drawVertexPrimitiveList(
+			getVerticesMap(STATIC_LEVEL_ID)->getPtrPool(), getVerticesMap(
+					STATIC_LEVEL_ID)->capacity(), getIndices(STATIC_LEVEL_ID),
+			getTrCount(STATIC_LEVEL_ID), video::EVT_STANDARD,
+			scene::EPT_TRIANGLES, video::EIT_32BIT);
+	for (int level = FIRST_DYNAMIC_LEVEL; level <= m_nLevel; level++)
+	{
+		driver->drawVertexPrimitiveList(getVerticesMap(level)->getPtrPool(),
+				getVerticesMap(level)->capacity(), getIndices(level),
+				getTrCount(level), video::EVT_STANDARD, scene::EPT_TRIANGLES,
+				video::EIT_32BIT);
+	}
 }
 
 const core::aabbox3d<f32>& SphereVisualization::getBoundingBox() const
@@ -127,10 +148,10 @@ video::SMaterial& SphereVisualization::getMaterial()
 }
 
 const core::vector2d<f32> SphereVisualization::getSphericalCoordinates(
-		const core::vector3df& v) const
+		const core::vector3df& normalVector) const
 {
-	return core::vector2d<f32>(atan2(v.Z, v.X) / (core::PI * 2), acos(v.Y
-			/ m_fRadius) / (core::PI));
+	return core::vector2d<f32>(atan2(normalVector.Z, normalVector.X)
+			/ (core::PI * 2), acos(normalVector.Y) / (core::PI));
 }
 
 void SphereVisualization::addTriangleToMesh(u32 triangle, int level)
@@ -139,37 +160,57 @@ void SphereVisualization::addTriangleToMesh(u32 triangle, int level)
 	{
 		u32 vertexId = m_Sphere.getTriangleVertex(triangle, level, j, false);
 
-		int hash = getCerticesMap()->hash(vertexId);
-		if (getCerticesMap()->getPtrKeys()[hash] == EMPTY_KEY)
+		jw::AutoCleanHashMap<video::S3DVertex> * currentLevelVerticesMap =
+				getVerticesMap(level);
+
+		int hash = currentLevelVerticesMap->hash(vertexId);
+		if (currentLevelVerticesMap->getPtrKeys()[hash] == EMPTY_KEY)
 		{
-			core::vector3df* ptrVertPos = m_Sphere.getVertex(vertexId);
-			video::S3DVertex vert(*ptrVertPos + m_vrtCenter, *ptrVertPos,
-					video::SColor(255, 200, 200, 200), getSphericalCoordinates(
-							*ptrVertPos));
-			vert.Normal.normalize();
-			//paintVertex(vertexId, &vert);
-			getCerticesMap()->put(vertexId, &vert);
-			//log->debug("%f,%f", vert.TCoords.X, vert.TCoords.Y);
+			video::S3DVertex vert;
+
+			video::S3DVertex* staticVertex = 0;
+			if (level >= FIRST_DYNAMIC_LEVEL)
+			{
+				jw::AutoCleanHashMap<video::S3DVertex> * staticVerticesMap =
+						getVerticesMap(STATIC_LEVEL_ID);
+				staticVertex = staticVerticesMap->get(vertexId);
+			}
+
+			if (staticVertex)
+			{
+				vert = *staticVertex;
+			}
+			else
+			{
+				core::vector3df* ptrVertPos = m_Sphere.getVertex(vertexId);
+				vert.Pos = *ptrVertPos + m_vrtCenter;
+				vert.Normal = *ptrVertPos;
+				vert.Normal.normalize();
+			}
+
+			vert.TCoords = getSphericalCoordinates(vert.Normal);
+
+			currentLevelVerticesMap->put(vertexId, &vert);
 		}
-		video::S3DVertex* v = getCerticesMap()->getPtrPool() + hash;
+		video::S3DVertex* v = currentLevelVerticesMap->getPtrPool() + hash;
 		if (v->TCoords.X == 0.5 && !(triangle & 0b11))
 		{
 			//The border case - the X Tcoordinate of some of the other triangle points is negative.
 			//Will add the same point but with X Tcoordinate = -0.5, so set the first bit (which is not used) of the ID
 			vertexId |= 0x80000000;
-			hash = getCerticesMap()->hash(vertexId);
-			if (getCerticesMap()->getPtrKeys()[hash] == EMPTY_KEY)
+			hash = currentLevelVerticesMap->hash(vertexId);
+			if (currentLevelVerticesMap->getPtrKeys()[hash] == EMPTY_KEY)
 			{
-				getCerticesMap()->put(vertexId, v);
+				currentLevelVerticesMap->put(vertexId, v);
 			}
-			v = getCerticesMap()->getPtrPool() + hash;
+			v = currentLevelVerticesMap->getPtrPool() + hash;
 			v->TCoords.X = -0.5;
 			//remove the first bit to work for painting
 			vertexId &= 0x7FFFFFFF;
 		}
-		paintVertex(vertexId, v);
+		paintVertex(vertexId, v, level);
 
-		getIndices()[incCurrentIndex()] = hash;
+		getIndices(level)[incCurrentIndex(level)] = hash;
 	}
 }
 
@@ -193,7 +234,7 @@ void SphereVisualization::generateMesh()
 	//startPt.setLength(m_fRadius);
 	//log->debug("generation started");
 	bool addingStarted = false;
-	while (getTrCount() < 2000)
+	while (getTotalTrCount() < 2000)
 	{
 		u32 vertexId = m_Sphere.getTriangleVertex(triangle, level, 0, false);
 		core::vector3df* ptrVertPos = m_Sphere.getVertex(vertexId);
@@ -212,7 +253,7 @@ void SphereVisualization::generateMesh()
 			{
 				break;
 			}
-			incTrCount();
+			incTrCount(level);
 		}
 		else
 		{
@@ -238,10 +279,11 @@ void SphereVisualization::generateMesh()
 							level));
 				}
 
+				//Empty the queue of the current BFS
 				do
 				{
 					addTriangleToMesh(triangle, level + 1);
-					if (incTrCount() >= 2000)
+					if (incTrCount(level + 1) >= 2000)
 					{
 						break;
 					}
@@ -261,7 +303,7 @@ void SphereVisualization::generateMesh()
 
 							//log->debug(" +%s", str.c_str());
 							addTriangleToMesh(childTr, level + 1);
-							if (incTrCount() >= 2000)
+							if (incTrCount(level + 1) >= 2000)
 							{
 								break;
 							}
@@ -272,7 +314,7 @@ void SphereVisualization::generateMesh()
 							//log->debug(" -%s", str.c_str());
 						}
 					}
-					if (getTrCount() >= 2000)
+					if (getTotalTrCount() >= 2000)
 					{
 						break;
 					}
@@ -283,6 +325,11 @@ void SphereVisualization::generateMesh()
 
 				i->drop();
 				i = newIterator;
+
+				if (!i->next(&triangle))
+				{
+					break;
+				}
 			}
 			else
 			{
@@ -349,16 +396,21 @@ void SphereVisualization::setTriangleUnderUs(u32 triangleUnderUs)
 	m_uTriangleUnderUs = triangleUnderUs;
 }
 
-void SphereVisualization::paintVertex(u32 vertexId, video::S3DVertex *v)
+void SphereVisualization::paintVertex(u32 vertexId, video::S3DVertex *v,
+		int level)
 {
-	v->Color = getMaterial().Wireframe ? video::SColor(255, 0, 255, 0)
+	v->Color = getMaterial().Wireframe ? //
+	(level < FIRST_DYNAMIC_LEVEL || level % 2 == 1 ? //
+	video::SColor(255, 0, 255, 0)
+			: video::SColor(255, 255, 0, 0))
 			: video::SColor(255, 200, 200, 200);
 	for (int i = 0; i < 3; i++)
 	{
 		if (m_vTriangleUnderUsPoints[i] == vertexId)
 		{
-			v->Color = getMaterial().Wireframe ? video::SColor(255, 255, 255, 0)
-					: video::SColor(255, 255, 255, 255);
+			v->Color
+					= getMaterial().Wireframe ? video::SColor(255, 255, 255, 0)
+							: video::SColor(255, 255, 255, 255);
 			break;
 		}
 	}

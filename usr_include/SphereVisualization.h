@@ -41,17 +41,23 @@ using namespace __gnu_cxx;
 #pragma comment(lib, "Irrlicht.lib")
 #endif
 
+#define FIRST_DYNAMIC_LEVEL 4
+#define STATIC_LEVEL_ID 0
+#define LEVEL_TO_ID(l) (l < FIRST_DYNAMIC_LEVEL ? STATIC_LEVEL_ID : l)
+
 class SphereVisualization: public irr::scene::ISceneNode
 {
 	jw::IJWLogger* log;
 
 	jw::JWSphere m_Sphere;
 
-	jw::AutoCleanHashMap<video::S3DVertex> m_mapVerteces;
+	jw::AutoCleanHashMap<video::S3DVertex> m_mapVerteces[MAX_TRIANGLE_LEVELS
+			+ 1];
 
-	int m_nTrCount;
-	int m_nCurrentIndex;
-	u32 * m_vIndices;
+	int m_vTrCount[MAX_TRIANGLE_LEVELS + 1];
+	int m_nTotalTrCount;
+	int m_vCurrentIndex[MAX_TRIANGLE_LEVELS + 1];
+	u32 * m_vIndices[MAX_TRIANGLE_LEVELS + 1];
 
 	core::aabbox3d<f32> m_Box;
 
@@ -95,7 +101,7 @@ public:
 	void setViewerPoint(const core::vector3df& viewerPoint);
 	u32 getUTriangleUnderUs() const;
 	void setTriangleUnderUs(u32 m_uTriangleUnderUs);
-	void paintVertex(u32 vertexId, video::S3DVertex* v);
+	void paintVertex(u32 vertexId, video::S3DVertex* v, int level);
 	int getLevel() const;
 	void setLevel(int level);
 
@@ -117,43 +123,56 @@ public:
 
 	void reloadTexture();
 
-	int getTrCount()
+	int getTrCount(int level)
 	{
-		return m_nTrCount;
+		return m_vTrCount[LEVEL_TO_ID(level)];
 	}
-
-	int incTrCount()
+	int getTotalTrCount()
 	{
-		return ++m_nTrCount;
+		return m_nTotalTrCount;
+	}
+	int incTrCount(int level)
+	{
+		m_vTrCount[LEVEL_TO_ID(level)]++;
+
+		return ++m_nTotalTrCount;
 	}
 
 	void setTrCount(int newCount)
 	{
-		m_nTrCount = newCount;
-	}
-
-	jw::AutoCleanHashMap<video::S3DVertex> * getCerticesMap()
-	{
-		return &m_mapVerteces;
-	}
-
-	u32 * getIndices()
-	{
-		if (!m_vIndices)
+		m_nTotalTrCount = newCount;
+		for (int i = 0; i <= MAX_TRIANGLE_LEVELS; i++)
 		{
-			m_vIndices = new u32[2000 * 3];
+			m_vTrCount[i] = newCount;
 		}
-		return m_vIndices;
 	}
 
-	int incCurrentIndex()
+	jw::AutoCleanHashMap<video::S3DVertex> * getVerticesMap(int level)
 	{
-		return m_nCurrentIndex++;
+		return &(m_mapVerteces[LEVEL_TO_ID(level)]);
+	}
+
+	u32 * getIndices(int level)
+	{
+		level = LEVEL_TO_ID(level);
+		if (!m_vIndices[level])
+		{
+			m_vIndices[level] = new u32[2000 * 3];
+		}
+		return m_vIndices[level];
+	}
+
+	int incCurrentIndex(int level)
+	{
+		return m_vCurrentIndex[LEVEL_TO_ID(level)]++;
 	}
 
 	void zeroCurrentIndex()
 	{
-		m_nCurrentIndex = 0;
+		for (int i = 0; i <= MAX_TRIANGLE_LEVELS; i++)
+		{
+			m_vCurrentIndex[i] = 0;
+		}
 	}
 };
 
