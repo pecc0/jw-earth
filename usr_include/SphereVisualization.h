@@ -1,22 +1,22 @@
 /* AUTORIGHTS
-Copyright (C) 2010,2011 Petko Petkov (petkodp@gmail.com
-      
-This file is part of JWorld.
+ Copyright (C) 2010,2011 Petko Petkov (petkodp@gmail.com
 
-JWorld is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2, or (at your option)
-any later version.
+ This file is part of JWorld.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+ JWorld is free software; you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation; either version 2, or (at your option)
+ any later version.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software Foundation,
-Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
-*/
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with this program; if not, write to the Free Software Foundation,
+ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ */
 /*
  * JWSphere.h
  *
@@ -78,9 +78,9 @@ class SphereVisualization: public irr::scene::ISceneNode
 	void addTriangleToMesh(u32 triangle, int level);
 public:
 	SphereVisualization(scene::ISceneNode *parent = 0,
-			scene::ISceneManager *mgr = 0, video::IVideoDriver* driver = 0, s32 id = 0, int level = 2,
-			const core::vector3df& center = core::vector3df(0.0f, 0.0f, 0.0f),
-			f32 radius = 12742.);
+			scene::ISceneManager *mgr = 0, video::IVideoDriver* driver = 0,
+			s32 id = 0, int level = 2, const core::vector3df& center =
+					core::vector3df(0.0f, 0.0f, 0.0f), f32 radius = 12742.);
 	virtual ~SphereVisualization();
 	virtual void OnRegisterSceneNode();
 	virtual void render();
@@ -99,7 +99,8 @@ public:
 	int getLevel() const;
 	void setLevel(int level);
 
-	void setMeshGenerated(bool meshGenerated) {
+	void setMeshGenerated(bool meshGenerated)
+	{
 		m_isMeshGenerated = meshGenerated;
 	}
 
@@ -109,11 +110,27 @@ public:
 	 *	See
 	 *	http://www.euclideanspace.com/maths/geometry/space/coordinates/polar/spherical/index.htm
 	 */
-	const core::vector2d<f32> getSphericalCoordinates(const core::vector3df& v) const;
+	const core::vector2d<f32>
+	getSphericalCoordinates(const core::vector3df& v) const;
 
 	void setWireframe(bool wireFrame);
 
 	void reloadTexture();
+
+	int getTrCount()
+	{
+		return m_nTrCount;
+	}
+
+	int incTrCount()
+	{
+		return ++m_nTrCount;
+	}
+
+	void setTrCount(int newCount)
+	{
+		m_nTrCount = newCount;
+	}
 };
 
 #endif /* EARTHVIS_H_ */

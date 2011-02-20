@@ -38,8 +38,8 @@ SphereVisualization::SphereVisualization(scene::ISceneNode* parent,
 			m_Texture(0), m_Driver(driver)
 {
 
-	m_Material.Wireframe = false;
-	m_Material.Lighting = false;
+	getMaterial().Wireframe = false;
+	getMaterial().Lighting = false;
 
 	m_mapVerteces = jw::AutoCleanHashMap<video::S3DVertex>(10000);
 	m_mapVerteces.init();
@@ -101,11 +101,11 @@ void SphereVisualization::render()
 {
 	video::IVideoDriver* driver = SceneManager->getVideoDriver();
 
-	driver->setMaterial(m_Material);
+	driver->setMaterial(getMaterial());
 	driver->setTransform(video::ETS_WORLD, AbsoluteTransformation);
 
 	driver->drawVertexPrimitiveList(m_mapVerteces.getPtrPool(),
-			m_mapVerteces.capacity(), m_vIndices, m_nTrCount,
+			m_mapVerteces.capacity(), m_vIndices, getTrCount(),
 			video::EVT_STANDARD, scene::EPT_TRIANGLES, video::EIT_32BIT);
 
 }
@@ -181,25 +181,11 @@ void SphereVisualization::generateMesh()
 
 	clear();
 
-	/*m_nTrCount = m_Sphere.getTilesSquare(JWTriangle::getParentTriangle(
-	 0b01010101010101010101010101010000, m_nLevel + 1), m_nLevel, 16,
-	 36, 8, 18, g_TrianglesBuf);
-	 if (m_nTrCount > 3000)
-	 {
-	 return;
-	 }
-	 */
-	m_nTrCount = 0;
+	setTrCount(0);
 
 	m_vIndices = new u32[2000 * 3];
 
 	m_nCurrentIndex = 0;
-	/*
-	 for (int i = 0; i < m_nTrCount; i++)
-	 {
-	 addTriangleToMesh(g_TrianglesBuf[i]);
-	 }
-	 */
 
 	int level = MAX_TRIANGLE_LEVELS;
 	jw::BFSIterator* i = m_Sphere.bfs(m_uTriangleUnderUs, level);
@@ -208,7 +194,7 @@ void SphereVisualization::generateMesh()
 	//startPt.setLength(m_fRadius);
 	//log->debug("generation started");
 	bool addingStarted = false;
-	while (m_nTrCount < 2000)
+	while (getTrCount() < 2000)
 	{
 		u32 vertexId = m_Sphere.getTriangleVertex(triangle, level, 0, false);
 		core::vector3df* ptrVertPos = m_Sphere.getVertex(vertexId);
@@ -227,7 +213,7 @@ void SphereVisualization::generateMesh()
 			{
 				break;
 			}
-			m_nTrCount++;
+			incTrCount();
 		}
 		else
 		{
@@ -256,8 +242,7 @@ void SphereVisualization::generateMesh()
 				do
 				{
 					addTriangleToMesh(triangle, level + 1);
-					m_nTrCount++;
-					if (m_nTrCount >= 2000)
+					if (incTrCount() >= 2000)
 					{
 						break;
 					}
@@ -277,8 +262,7 @@ void SphereVisualization::generateMesh()
 
 							//log->debug(" +%s", str.c_str());
 							addTriangleToMesh(childTr, level + 1);
-							m_nTrCount++;
-							if (m_nTrCount >= 2000)
+							if (incTrCount() >= 2000)
 							{
 								break;
 							}
@@ -289,7 +273,7 @@ void SphereVisualization::generateMesh()
 							//log->debug(" -%s", str.c_str());
 						}
 					}
-					if (m_nTrCount >= 2000)
+					if (getTrCount() >= 2000)
 					{
 						break;
 					}
@@ -372,13 +356,13 @@ void SphereVisualization::setTriangleUnderUs(u32 triangleUnderUs)
 
 void SphereVisualization::paintVertex(u32 vertexId, video::S3DVertex *v)
 {
-	v->Color = m_Material.Wireframe ? video::SColor(255, 0, 255, 0)
+	v->Color = getMaterial().Wireframe ? video::SColor(255, 0, 255, 0)
 			: video::SColor(255, 200, 200, 200);
 	for (int i = 0; i < 3; i++)
 	{
 		if (m_vTriangleUnderUsPoints[i] == vertexId)
 		{
-			v->Color = m_Material.Wireframe ? video::SColor(255, 255, 255, 0)
+			v->Color = getMaterial().Wireframe ? video::SColor(255, 255, 255, 0)
 					: video::SColor(255, 255, 255, 255);
 			break;
 		}
@@ -406,14 +390,14 @@ void SphereVisualization::setWireframe(bool wireFrame)
 
 void SphereVisualization::reloadTexture()
 {
-	GoogleTextureProvider provider;
-
 	if (m_Texture)
 	{
+		return;
 		m_Driver->removeTexture(m_Texture);
 		//m_Texture->drop();
 	}
-	m_Texture = m_Driver->getTexture("media/earth.bmp");
+	GoogleTextureProvider provider;
+	m_Texture = m_Driver->getTexture("media/earth.jpg");
 	getMaterial().setTexture(0, m_Texture);
 	//provider.
 }

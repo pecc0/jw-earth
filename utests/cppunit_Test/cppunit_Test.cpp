@@ -37,17 +37,26 @@ public:
 	void loadTile()
 	{
 		GoogleTilesLoader tileLoader;
-		CImg<pixelFormat>* img = tileLoader.loadTile(2, 1, 1);
+		CImg<pixelFormat>* result = new CImg<pixelFormat>(256 * 4, 256 * 4, 1, 3);
 
+		for (int x = 0; x < 4; x++) {
+			for (int y = 0; y < 4; y++) {
+				CImg<pixelFormat>* img = tileLoader.loadTile(x, y, 2);
+				result->draw_image(x * 256, y * 256, *img);
+				delete img;
+			}
+		}
+
+/*
 		CImgDisplay main_disp(*img, "View");
 		while (!main_disp.is_closed())
 		{
 			main_disp.wait();
 		}
+*/
+		result->save_jpeg("out.jpg", 100);
+		delete result;
 
-		img->save_jpeg("out.jpg", 100);
-
-		delete img;
 	}
 };
 CPPUNIT_TEST_SUITE_REGISTRATION( GenericTest );

@@ -43,7 +43,7 @@ CImg<pixelFormat> *GoogleTilesLoader::loadTile(int x, int y, int z)
 	const char* filename = cacheFileStr.c_str();
 	ifstream cacheStream(filename);
 
-	//if (!cacheStream)
+	if (!cacheStream)
 	{
 		//download
 		std::ostringstream url;
