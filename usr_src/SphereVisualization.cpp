@@ -80,6 +80,7 @@ void SphereVisualization::init()
 void SphereVisualization::clear()
 {
 	delete[] m_vIndices;
+	m_vIndices = 0;
 }
 
 SphereVisualization::~SphereVisualization()
@@ -104,8 +105,8 @@ void SphereVisualization::render()
 	driver->setMaterial(getMaterial());
 	driver->setTransform(video::ETS_WORLD, AbsoluteTransformation);
 
-	driver->drawVertexPrimitiveList(m_mapVerteces.getPtrPool(),
-			m_mapVerteces.capacity(), m_vIndices, getTrCount(),
+	driver->drawVertexPrimitiveList(getCerticesMap()->getPtrPool(),
+			getCerticesMap()->capacity(), getIndices(), getTrCount(),
 			video::EVT_STANDARD, scene::EPT_TRIANGLES, video::EIT_32BIT);
 
 }
@@ -138,8 +139,8 @@ void SphereVisualization::addTriangleToMesh(u32 triangle, int level)
 	{
 		u32 vertexId = m_Sphere.getTriangleVertex(triangle, level, j, false);
 
-		int hash = m_mapVerteces.hash(vertexId);
-		if (m_mapVerteces.getPtrKeys()[hash] == EMPTY_KEY)
+		int hash = getCerticesMap()->hash(vertexId);
+		if (getCerticesMap()->getPtrKeys()[hash] == EMPTY_KEY)
 		{
 			core::vector3df* ptrVertPos = m_Sphere.getVertex(vertexId);
 			video::S3DVertex vert(*ptrVertPos + m_vrtCenter, *ptrVertPos,
@@ -147,28 +148,28 @@ void SphereVisualization::addTriangleToMesh(u32 triangle, int level)
 							*ptrVertPos));
 			vert.Normal.normalize();
 			//paintVertex(vertexId, &vert);
-			m_mapVerteces.put(vertexId, &vert);
+			getCerticesMap()->put(vertexId, &vert);
 			//log->debug("%f,%f", vert.TCoords.X, vert.TCoords.Y);
 		}
-		video::S3DVertex* v = m_mapVerteces.getPtrPool() + hash;
+		video::S3DVertex* v = getCerticesMap()->getPtrPool() + hash;
 		if (v->TCoords.X == 0.5 && !(triangle & 0b11))
 		{
 			//The border case - the X Tcoordinate of some of the other triangle points is negative.
 			//Will add the same point but with X Tcoordinate = -0.5, so set the first bit (which is not used) of the ID
 			vertexId |= 0x80000000;
-			hash = m_mapVerteces.hash(vertexId);
-			if (m_mapVerteces.getPtrKeys()[hash] == EMPTY_KEY)
+			hash = getCerticesMap()->hash(vertexId);
+			if (getCerticesMap()->getPtrKeys()[hash] == EMPTY_KEY)
 			{
-				m_mapVerteces.put(vertexId, v);
+				getCerticesMap()->put(vertexId, v);
 			}
-			v = m_mapVerteces.getPtrPool() + hash;
+			v = getCerticesMap()->getPtrPool() + hash;
 			v->TCoords.X = -0.5;
 			//remove the first bit to work for painting
 			vertexId &= 0x7FFFFFFF;
 		}
 		paintVertex(vertexId, v);
 
-		m_vIndices[m_nCurrentIndex++] = hash;
+		getIndices()[incCurrentIndex()] = hash;
 	}
 }
 
@@ -183,9 +184,7 @@ void SphereVisualization::generateMesh()
 
 	setTrCount(0);
 
-	m_vIndices = new u32[2000 * 3];
-
-	m_nCurrentIndex = 0;
+	zeroCurrentIndex();
 
 	int level = MAX_TRIANGLE_LEVELS;
 	jw::BFSIterator* i = m_Sphere.bfs(m_uTriangleUnderUs, level);
@@ -278,11 +277,7 @@ void SphereVisualization::generateMesh()
 						break;
 					}
 
-					//if (!newIterator->isUsed(triangle))
-					//{
-					//	newIterator->setUsed(triangle);
 					newIterator->accept(triangle);
-					//}
 
 				} while (i->next(&triangle));
 

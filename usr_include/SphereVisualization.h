@@ -131,6 +131,30 @@ public:
 	{
 		m_nTrCount = newCount;
 	}
+
+	jw::AutoCleanHashMap<video::S3DVertex> * getCerticesMap()
+	{
+		return &m_mapVerteces;
+	}
+
+	u32 * getIndices()
+	{
+		if (!m_vIndices)
+		{
+			m_vIndices = new u32[2000 * 3];
+		}
+		return m_vIndices;
+	}
+
+	int incCurrentIndex()
+	{
+		return m_nCurrentIndex++;
+	}
+
+	void zeroCurrentIndex()
+	{
+		m_nCurrentIndex = 0;
+	}
 };
 
 #endif /* EARTHVIS_H_ */
