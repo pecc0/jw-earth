@@ -25,13 +25,28 @@
  */
 
 #include "GoogleTextureProvider.h"
+#include "IJWLogger.h"
+#include <boost/thread.hpp>
+#include "LoggerFactory.h"
 
+GoogleTextureProvider::GoogleTextureProvider() :
+	log(jw::log::LoggerFactory::getLogger("com.jw.GoogleTextureProvider"))
+{
+
+}
 GoogleTextureProvider::~GoogleTextureProvider()
 {
 }
 
 void GoogleTextureProvider::getTexture(core::vector2d<f32>& ceterCoordinates)
 {
+	boost::thread thrd(*this);
+
+}
+
+void GoogleTextureProvider::operator()()
+{
+
 }
 
 void GoogleTextureProvider::setTextureReceiver(

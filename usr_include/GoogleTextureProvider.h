@@ -29,6 +29,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 
 #include "ITextureReceiver.h"
+#include "IJWLogger.h"
 
 using namespace irr;
 
@@ -36,11 +37,16 @@ class GoogleTextureProvider
 {
 private:
 	ITextureReceiver * m_TextureReceiver;
+	jw::log::IJWLogger* log;
 public:
+
+	GoogleTextureProvider();
 
 	virtual ~GoogleTextureProvider();
 
 	void getTexture(core::vector2d<f32>& ceterCoordinates);
+
+	void operator()();
 
 	void setTextureReceiver(ITextureReceiver * textureReceiver);
 };
