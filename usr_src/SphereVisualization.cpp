@@ -92,6 +92,7 @@ void SphereVisualization::clear()
 	{
 		delete[] m_vIndices[i];
 		m_vIndices[i] = 0;
+		textureBinds[i].LowerRightCorner.X = UNINITED_TEXTURE_COORDINATES;
 	}
 
 }
@@ -156,6 +157,7 @@ const core::vector2d<f32> SphereVisualization::getSphericalCoordinates(
 
 void SphereVisualization::addTriangleToMesh(u32 triangle, int level)
 {
+	irr::core::rect<f32>* binds = &(textureBinds[level]);
 	for (int j = 2; j >= 0; --j)
 	{
 		u32 vertexId = m_Sphere.getTriangleVertex(triangle, level, j, false);
@@ -193,6 +195,31 @@ void SphereVisualization::addTriangleToMesh(u32 triangle, int level)
 			currentLevelVerticesMap->put(vertexId, &vert);
 		}
 		video::S3DVertex* v = currentLevelVerticesMap->getPtrPool() + hash;
+
+		if (level >= FIRST_DYNAMIC_LEVEL)
+		{
+			if (binds->LowerRightCorner.X == UNINITED_TEXTURE_COORDINATES)
+			{
+				binds->LowerRightCorner = v->TCoords;
+				binds->UpperLeftCorner = v->TCoords;
+			}
+			else
+			{
+				core::vector2df tCoords = v->TCoords;
+				if (binds->LowerRightCorner.X < -0.25 && tCoords.X > 0.25)
+				{
+					binds->LowerRightCorner.X += 1;
+					binds->UpperLeftCorner.X += 1;
+				}
+				else if (binds->UpperLeftCorner.X > 0.25 && tCoords.X < -0.25)
+				{
+					tCoords.X += 1;
+				}
+
+				binds->addInternalPoint(tCoords);
+			}
+		}
+
 		if (v->TCoords.X == 0.5 && !(triangle & 0b11))
 		{
 			//The border case - the X Tcoordinate of some of the other triangle points is negative.

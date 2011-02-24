@@ -45,6 +45,7 @@ using namespace __gnu_cxx;
 #define FIRST_DYNAMIC_LEVEL 4
 #define STATIC_LEVEL_ID 0
 #define LEVEL_TO_ID(l) (l < FIRST_DYNAMIC_LEVEL ? STATIC_LEVEL_ID : l)
+#define UNINITED_TEXTURE_COORDINATES -3.
 
 class SphereVisualization: public irr::scene::ISceneNode, virtual ITextureReceiver
 {
@@ -79,6 +80,8 @@ class SphereVisualization: public irr::scene::ISceneNode, virtual ITextureReceiv
 	irr::video::ITexture * m_Texture;
 
 	video::IVideoDriver* m_Driver;
+
+	irr::core::rect<f32> textureBinds[MAX_TRIANGLE_LEVELS + 1]; //texture binds for each level
 
 	void init();
 	void clear();

@@ -317,11 +317,17 @@ int main()
 		driver->endScene();
 		if (++frames == 100)
 		{
-			core::stringw str = L"Irrlicht Engine [";
-			str += driver->getName();
-			str += L"] FPS: ";
+			core::vector3df vpoint = g_EarthVisualization->getViewerPoint();
+			vpoint.normalize();
+			core::vector2d<f32> txCoord = g_EarthVisualization->getSphericalCoordinates(vpoint);
+
+			core::stringw str = L"FPS: ";
 			str += (s32) (driver->getFPS());
-			str += L"] Tile: ";
+			str += L" TCoord:(";
+			str += txCoord.X;
+			str += L", ";
+			str += txCoord.Y;
+			str += L") Tile: ";
 			str.printBinary(g_EarthVisualization->getUTriangleUnderUs(), 32,
 					L'0', L'1');
 			g_Device->setWindowCaption(str.c_str());
