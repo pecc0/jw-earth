@@ -26,6 +26,9 @@
 
 #include "GoogleTextureProvider.h"
 #include "IJWLogger.h"
+
+#define BOOST_THREAD_USE_LIB
+
 #include <boost/thread.hpp>
 #include "LoggerFactory.h"
 
