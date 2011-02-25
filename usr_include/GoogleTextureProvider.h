@@ -33,18 +33,22 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 using namespace irr;
 
+#define GOOGLE_TILE_SIZE 256
+
 class GoogleTextureProvider
 {
 private:
 	ITextureReceiver * m_TextureReceiver;
 	jw::log::IJWLogger* log;
+	irr::core::rect<f32> m_Boundary;
+	int m_nLevel;
 public:
 
 	GoogleTextureProvider();
 
 	virtual ~GoogleTextureProvider();
 
-	void getTexture(core::vector2d<f32>& ceterCoordinates);
+	void getTexture(const irr::core::rect<f32>& boundary, int level);
 
 	void operator()();
 

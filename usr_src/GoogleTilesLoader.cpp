@@ -48,7 +48,7 @@ CImg<pixelFormat> *GoogleTilesLoader::loadTile(int x, int y, int z)
 		//download
 		std::ostringstream url;
 		//TODO url in parameter
-		url << "http://khm0.google.com/kh/v=78&" << coordinatesStr.str()
+		url << "http://khm0.google.com/kh/v=80&" << coordinatesStr.str()
 				<< "&s=Galileo.jpg";
 
 		CURL *curl;

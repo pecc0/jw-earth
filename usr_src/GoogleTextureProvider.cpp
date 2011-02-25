@@ -26,6 +26,7 @@
 
 #include "GoogleTextureProvider.h"
 #include "IJWLogger.h"
+#include "GoogleTilesLoader.h"
 
 #define BOOST_THREAD_USE_LIB
 
@@ -41,14 +42,45 @@ GoogleTextureProvider::~GoogleTextureProvider()
 {
 }
 
-void GoogleTextureProvider::getTexture(core::vector2d<f32>& ceterCoordinates)
+void GoogleTextureProvider::getTexture(const irr::core::rect<f32>& boundary,
+		int level)
 {
+	m_Boundary = boundary;
+	m_nLevel = level;
 	boost::thread thrd(*this);
 
 }
 
 void GoogleTextureProvider::operator()()
 {
+	int maxTiles = 1 >> m_nLevel;
+	irr::core::rect<s32> tilesBoundary;
+	tilesBoundary.LowerRightCorner.X = (s32) floor(maxTiles
+			* m_Boundary.LowerRightCorner.X);
+	tilesBoundary.LowerRightCorner.Y = (s32) floor(maxTiles
+			* m_Boundary.LowerRightCorner.Y);
+
+	tilesBoundary.UpperLeftCorner.X = (s32) ceil(maxTiles
+			* m_Boundary.UpperLeftCorner.X);
+	tilesBoundary.UpperLeftCorner.Y = (s32) ceil(maxTiles
+			* m_Boundary.UpperLeftCorner.Y);
+
+	GoogleTilesLoader tileLoader;
+	CImg<pixelFormat>* result = new CImg<pixelFormat> (GOOGLE_TILE_SIZE * tilesBoundary.getWidth() , GOOGLE_TILE_SIZE * tilesBoundary.getHeight(), 1, 3);
+
+	for (int x = tilesBoundary.LowerRightCorner.X; x < tilesBoundary.UpperLeftCorner.X; x++)
+	{
+		for (int y = tilesBoundary.LowerRightCorner.Y; y < tilesBoundary.UpperLeftCorner.Y; y++)
+		{
+			CImg<pixelFormat>* img = tileLoader.loadTile(x, y, 2);
+			result->draw_image(x * GOOGLE_TILE_SIZE, y * GOOGLE_TILE_SIZE, *img);
+			delete img;
+		}
+	}
+
+	//result->
+
+	delete result;
 
 }
 
