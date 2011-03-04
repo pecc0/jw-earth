@@ -9,9 +9,14 @@
 #define IMAGECIMG_H_
 
 #include "irrlicht.h"
+#include "CImg.h"
 
 using namespace irr;
 using namespace irr::video;
+
+using namespace cimg_library;
+
+typedef unsigned char wrappedPixelFormat;
 
 /**
  * Implementation of IImage with CImg library
@@ -19,7 +24,7 @@ using namespace irr::video;
 class ImageCImg: public IImage
 {
 public:
-	ImageCImg(const IImage& wrapped);
+	ImageCImg(const CImg<wrappedPixelFormat> & wrapped);
 	virtual ~ImageCImg();
 
 	virtual void* lock();
@@ -48,8 +53,7 @@ public:
 	virtual SColor getPixel(u32 x, u32 y) const;
 
 	//! Sets a pixel
-	virtual void
-	setPixel(u32 x, u32 y, const SColor &color, bool blend = false);
+	virtual void setPixel(u32 x, u32 y, const SColor &color, bool blend);
 
 	//! Returns the color format
 	virtual ECOLOR_FORMAT getColorFormat() const;
@@ -70,35 +74,27 @@ public:
 	virtual u32 getPitch() const;
 
 	//! Copies the image into the target, scaling the image to fit
-	virtual void copyToScaling(void* target, u32 width, u32 height,
-			ECOLOR_FORMAT format = ECF_A8R8G8B8, u32 pitch);
+	virtual void copyToScaling(void* target, u32 width, u32 height, ECOLOR_FORMAT format, u32 pitch);
 
 	//! Copies the image into the target, scaling the image to fit
 	virtual void copyToScaling(IImage* target);
 
 	//! copies this surface into another
-	virtual void copyTo(IImage* target,
-			const core::position2d<s32>& pos = core::position2d<s32>(0, 0));
+	virtual void copyTo(IImage* target, const core::position2d<s32>& pos = core::position2d<s32>(0, 0));
 
 	//! copies this surface into another
-	virtual void copyTo(IImage* target, const core::position2d<s32>& pos,
-			const core::rect<s32>& sourceRect, const core::rect<s32>* clipRect =
-					0);
+	virtual void copyTo(IImage* target, const core::position2d<s32>& pos, const core::rect<s32>& sourceRect, const core::rect<s32>* clipRect);
 
 	//! copies this surface into another, using the alpha mask, an cliprect and a color to add with
-	virtual void copyToWithAlpha(IImage* target,
-			const core::position2d<s32>& pos,
-			const core::rect<s32>& sourceRect, const SColor &color,
-			const core::rect<s32>* clipRect);
+	virtual void copyToWithAlpha(IImage* target, const core::position2d<s32>& pos, const core::rect<s32>& sourceRect, const SColor &color, const core::rect<s32>* clipRect);
 
 	//! copies this surface into another, scaling it to fit, appyling a box filter
-	virtual void copyToScalingBoxFilter(IImage* target, s32 bias, bool blend =
-			false);
+	virtual void copyToScalingBoxFilter(IImage* target, s32 bias, bool blend);
 
 	//! fills the surface with black or white
 	virtual void fill(const SColor &color);
 private:
-	IImage m_wrapped;
+	CImg<wrappedPixelFormat> m_wrapped;
 };
 
 #endif /* IMAGECIMG_H_ */
