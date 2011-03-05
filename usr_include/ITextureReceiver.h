@@ -15,7 +15,7 @@ using namespace irr;
 class ITextureReceiver
 {
 public:
-	virtual void receiveTexture(io::IReadFile* sourceFile) = 0;
+	virtual void receiveTexture(video::ITexture * texture) = 0;
 };
 
 #endif /* ITEXTURERECEIVER_H_ */

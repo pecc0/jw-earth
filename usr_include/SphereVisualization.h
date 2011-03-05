@@ -127,7 +127,7 @@ public:
 
 	void reloadTexture();
 
-	virtual void receiveTexture(io::IReadFile* sourceFile);
+	virtual void receiveTexture(video::ITexture* texture);
 
 	int getTrCount(int level)
 	{

@@ -26,12 +26,13 @@
 
 #include "GoogleTextureProvider.h"
 #include "IJWLogger.h"
-#include "GoogleTilesLoader.h"
 
 #define BOOST_THREAD_USE_LIB
 
 #include <boost/thread.hpp>
 #include "LoggerFactory.h"
+#include <sstream>
+#include "irrlitch/ImageCImg.h"
 
 GoogleTextureProvider::GoogleTextureProvider() :
 	log(jw::log::LoggerFactory::getLogger("com.jw.GoogleTextureProvider"))
@@ -43,10 +44,11 @@ GoogleTextureProvider::~GoogleTextureProvider()
 }
 
 void GoogleTextureProvider::getTexture(const irr::core::rect<f32>& boundary,
-		int level)
+		int level, video::IVideoDriver* driver)
 {
 	m_Boundary = boundary;
 	m_nLevel = level;
+	m_Driver = driver;
 	boost::thread thrd(*this);
 
 }
@@ -66,11 +68,15 @@ void GoogleTextureProvider::operator()()
 			* m_Boundary.UpperLeftCorner.Y);
 
 	GoogleTilesLoader tileLoader;
-	CImg<pixelFormat>* result = new CImg<pixelFormat> (GOOGLE_TILE_SIZE * tilesBoundary.getWidth() , GOOGLE_TILE_SIZE * tilesBoundary.getHeight(), 1, 3);
+	CImg<pixelFormat>* result = new CImg<pixelFormat> (GOOGLE_TILE_SIZE
+			* tilesBoundary.getWidth(), GOOGLE_TILE_SIZE
+			* tilesBoundary.getHeight(), 1, 3);
 
-	for (int x = tilesBoundary.LowerRightCorner.X; x < tilesBoundary.UpperLeftCorner.X; x++)
+	for (int x = tilesBoundary.LowerRightCorner.X; x
+			< tilesBoundary.UpperLeftCorner.X; x++)
 	{
-		for (int y = tilesBoundary.LowerRightCorner.Y; y < tilesBoundary.UpperLeftCorner.Y; y++)
+		for (int y = tilesBoundary.LowerRightCorner.Y; y
+				< tilesBoundary.UpperLeftCorner.Y; y++)
 		{
 			CImg<pixelFormat>* img = tileLoader.loadTile(x, y, 2);
 			result->draw_image(x * GOOGLE_TILE_SIZE, y * GOOGLE_TILE_SIZE, *img);
@@ -78,10 +84,25 @@ void GoogleTextureProvider::operator()()
 		}
 	}
 
+	GoogleVideoDriverWrapper driver(result);
+
+	driver.setWrapped(m_Driver);
+
+	std::ostringstream textureName;
+	textureName << "CImg:z=" << m_nLevel << ",x1="
+			<< tilesBoundary.LowerRightCorner.X << ",y1="
+			<< tilesBoundary.LowerRightCorner.Y << ",x2="
+			<< tilesBoundary.UpperLeftCorner.X << ",y2="
+			<< tilesBoundary.UpperLeftCorner.Y;
+
+
+	ITexture* texture = driver.getTexture(textureName.str().c_str());
+
 	//result->
 
 	delete result;
 
+	m_TextureReceiver->receiveTexture(texture);
 }
 
 void GoogleTextureProvider::setTextureReceiver(
@@ -90,3 +111,21 @@ void GoogleTextureProvider::setTextureReceiver(
 	m_TextureReceiver = textureReceiver;
 }
 
+GoogleVideoDriverWrapper::GoogleVideoDriverWrapper(CImg<unsigned char>* img) :
+	m_Img(img)
+{
+
+}
+
+IImage* GoogleVideoDriverWrapper::createImageFromFile(const io::path& filename)
+{
+	if (filename == "CImg")
+	{
+		ImageCImg * result = new ImageCImg(m_Img);
+		return result;
+	}
+	else
+	{
+		return m_wrapped->createImageFromFile(filename);
+	}
+}

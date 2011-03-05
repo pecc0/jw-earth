@@ -15,7 +15,7 @@ using namespace irr::video;
 
 class VideDriverWrapper: public IVideoDriver
 {
-private:
+protected:
 	IVideoDriver * m_wrapped;
 public:
 	void setWrapped(video::IVideoDriver * wrapped);

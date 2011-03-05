@@ -24,7 +24,7 @@ typedef unsigned char wrappedPixelFormat;
 class ImageCImg: public IImage
 {
 public:
-	ImageCImg(const CImg<wrappedPixelFormat> & wrapped);
+	ImageCImg(CImg<wrappedPixelFormat>* wrapped);
 	virtual ~ImageCImg();
 
 	virtual void* lock();
@@ -94,7 +94,8 @@ public:
 	//! fills the surface with black or white
 	virtual void fill(const SColor &color);
 private:
-	CImg<wrappedPixelFormat> m_wrapped;
+	CImg<wrappedPixelFormat>* m_wrapped;
+	core::dimension2d<u32> m_size;
 };
 
 #endif /* IMAGECIMG_H_ */

@@ -116,8 +116,8 @@ void SphereVisualization::render()
 {
 	video::IVideoDriver* driver = SceneManager->getVideoDriver();
 
-	driver->setMaterial(getMaterial());
 	driver->setTransform(video::ETS_WORLD, AbsoluteTransformation);
+	driver->setMaterial(getMaterial());
 
 	driver->drawVertexPrimitiveList(
 			getVerticesMap(STATIC_LEVEL_ID)->getPtrPool(), getVerticesMap(
@@ -476,7 +476,7 @@ void SphereVisualization::reloadTexture()
 	//provider.
 }
 
-void SphereVisualization::receiveTexture(io::IReadFile* sourceFile)
+void SphereVisualization::receiveTexture(video::ITexture* texture)
 {
 
 }
